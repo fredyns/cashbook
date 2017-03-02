@@ -1,0 +1,168 @@
+
+CREATE TABLE IF NOT EXISTS `migration` (
+  `version` VARCHAR(180) NOT NULL,
+  `apply_time` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`version`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `profile` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `name` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `public_email` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `gravatar_email` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `gravatar_id` VARCHAR(32) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `location` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `website` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `bio` TEXT CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `timezone` VARCHAR(40) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `picture_id` BIGINT(19) UNSIGNED NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `user_id` (`user_id` ASC),
+  INDEX `picture_id` (`picture_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `social_account` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `provider` VARCHAR(255) CHARACTER SET 'utf8' NOT NULL,
+  `client_id` VARCHAR(255) CHARACTER SET 'utf8' NOT NULL,
+  `data` TEXT CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `code` VARCHAR(32) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `created_at` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `email` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `username` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `account_unique` (`provider` ASC, `client_id` ASC),
+  UNIQUE INDEX `account_unique_code` (`code` ASC),
+  INDEX `user_id` (`user_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `token` (
+  `user_id` INT(10) UNSIGNED NOT NULL,
+  `code` VARCHAR(32) CHARACTER SET 'utf8' NOT NULL,
+  `created_at` INT(10) UNSIGNED NOT NULL,
+  `type` SMALLINT(6) NOT NULL,
+  INDEX `user_id` (`user_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `uploaded_file` (
+  `id` BIGINT(19) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NULL DEFAULT NULL,
+  `filename` TEXT NULL DEFAULT NULL,
+  `size` INT(11) NULL DEFAULT NULL,
+  `type` VARCHAR(64) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `user` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(255) CHARACTER SET 'utf8' NOT NULL,
+  `email` VARCHAR(255) CHARACTER SET 'utf8' NOT NULL,
+  `password_hash` VARCHAR(60) CHARACTER SET 'utf8' NOT NULL,
+  `auth_key` VARCHAR(32) CHARACTER SET 'utf8' NOT NULL,
+  `confirmed_at` INT(11) NULL DEFAULT NULL,
+  `unconfirmed_email` VARCHAR(255) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `blocked_at` INT(11) NULL DEFAULT NULL,
+  `registration_ip` VARCHAR(45) CHARACTER SET 'utf8' NULL DEFAULT NULL,
+  `created_at` INT(10) UNSIGNED NOT NULL,
+  `updated_at` INT(10) UNSIGNED NOT NULL,
+  `flags` INT(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `user_unique_email` (`email` ASC),
+  UNIQUE INDEX `user_unique_username` (`username` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `yii_session` (
+  `id` CHAR(64) CHARACTER SET 'utf8' NOT NULL,
+  `expire` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `data` LONGBLOB NULL DEFAULT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `account` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `owner_uid` INT(10) UNSIGNED NOT NULL,
+  `number` VARCHAR(32) NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `currency` VARCHAR(8) NOT NULL,
+  `accountStatus` ENUM('active', 'suspended') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`id`),
+  INDEX `index2` (`owner_uid` ASC),
+  INDEX `index3` (`number` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `budgetItem` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(64) NOT NULL,
+  `description` VARCHAR(255) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `cashflow` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `cashflowType_id` INT(10) UNSIGNED NOT NULL,
+  `number` VARCHAR(32) NOT NULL,
+  `date` DATE NOT NULL,
+  `approval` ENUM('pending', 'approved') NOT NULL DEFAULT 'pending',
+  `account_id` INT(10) UNSIGNED NOT NULL,
+  `notes` TEXT NULL DEFAULT NULL,
+  `approved_at` INT(10) UNSIGNED NULL DEFAULT NULL,
+  `approved_by` INT(10) UNSIGNED NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `index2` (`cashflowType_id` ASC),
+  INDEX `index3` (`account_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `cashflowType` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `cashflowDetail` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `cashflow_id` INT(10) UNSIGNED NOT NULL,
+  `flow` ENUM('debit', 'credit') NOT NULL,
+  `nominal` FLOAT(11) NOT NULL,
+  `budgetItem_id` INT(10) UNSIGNED NOT NULL,
+  `notes` TEXT NULL DEFAULT NULL,
+  `monthlyBudgetItem_id` INT(10) UNSIGNED NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `index2` (`cashflow_id` ASC),
+  INDEX `index3` (`budgetItem_id` ASC),
+  INDEX `index4` (`monthlyBudgetItem_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `monthly_budgetItem` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `year` YEAR NOT NULL,
+  `month` TINYINT(3) UNSIGNED NOT NULL,
+  `budgetItem_id` INT(10) UNSIGNED NOT NULL,
+  `openBalance` FLOAT(11) NOT NULL DEFAULT 0,
+  `debit` FLOAT(11) NOT NULL DEFAULT 0,
+  `credit` FLOAT(11) NOT NULL DEFAULT 0,
+  `closingBalance` FLOAT(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  INDEX `idx_cycle` (`year` ASC, `month` ASC),
+  INDEX `idx_budget` (`budgetItem_id` ASC))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+

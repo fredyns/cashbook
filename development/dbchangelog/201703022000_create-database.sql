@@ -1,0 +1,4 @@
+
+CREATE SCHEMA IF NOT EXISTS `cashbook` DEFAULT CHARACTER SET utf8 ;
+
+USE `cashbook`;
