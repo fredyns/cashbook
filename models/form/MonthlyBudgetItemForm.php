@@ -41,9 +41,15 @@ class MonthlyBudgetItemForm extends MonthlyBudgetItem
           /* value references */
           [['year', 'month', 'budgetItem_id'], 'required'],
           [['year'], 'safe'],
-          [['month', 'budgetItem_id'], 'integer'],
+          [['month', 'budgetItem_id', 'deleted_at', 'deleted_by'], 'integer'],
           [['openBalance', 'debit', 'credit', 'closingBalance'], 'number'],
+          [['recordStatus'], 'string'],
           [['budgetItem_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\BudgetItem::className(), 'targetAttribute' => ['budgetItem_id' => 'id']],
+          ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
+                ]
+            ],
         ];
     }
 

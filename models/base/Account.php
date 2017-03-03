@@ -5,6 +5,8 @@
 namespace app\models\base;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the base-model class for table "account".
@@ -15,6 +17,13 @@ use Yii;
  * @property string $name
  * @property string $currency
  * @property string $accountStatus
+ * @property string $recordStatus
+ * @property integer $deleted_at
+ * @property integer $deleted_by
+ * @property integer $created_at
+ * @property integer $created_by
+ * @property integer $updated_at
+ * @property integer $updated_by
  *
  * @property \app\models\Cashflow[] $cashflows
  * @property string $aliasModel
@@ -27,6 +36,8 @@ abstract class Account extends \yii\db\ActiveRecord
      */
     const ACCOUNTSTATUS_ACTIVE = 'active';
     const ACCOUNTSTATUS_SUSPENDED = 'suspended';
+    const RECORDSTATUS_ACTIVE = 'active';
+    const RECORDSTATUS_DELETED = 'deleted';
 
     var $enum_labels = false;
     
@@ -41,18 +52,38 @@ abstract class Account extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [
+            'blameable' => [
+                'class' => BlameableBehavior::className(),
+            ],
+            'timestamp' => [
+                'class' => TimestampBehavior::className(),
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
             [['owner_uid', 'number', 'name', 'currency'], 'required'],
-            [['owner_uid'], 'integer'],
-            [['accountStatus'], 'string'],
+            [['owner_uid', 'deleted_at', 'deleted_by'], 'integer'],
+            [['accountStatus', 'recordStatus'], 'string'],
             [['number'], 'string', 'max' => 32],
             [['name'], 'string', 'max' => 255],
             [['currency'], 'string', 'max' => 8],
             ['accountStatus', 'in', 'range' => [
                     self::ACCOUNTSTATUS_ACTIVE,
                     self::ACCOUNTSTATUS_SUSPENDED,
+                ]
+            ],
+            ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
                 ]
             ]
         ];
@@ -70,6 +101,13 @@ abstract class Account extends \yii\db\ActiveRecord
             'name' => 'Name',
             'currency' => 'Currency',
             'accountStatus' => 'Account Status',
+            'recordStatus' => 'Record Status',
+            'created_at' => 'Created At',
+            'created_by' => 'Created By',
+            'updated_at' => 'Updated At',
+            'updated_by' => 'Updated By',
+            'deleted_at' => 'Deleted At',
+            'deleted_by' => 'Deleted By',
         ];
     }
         
@@ -106,6 +144,34 @@ abstract class Account extends \yii\db\ActiveRecord
         return [
             self::ACCOUNTSTATUS_ACTIVE => self::ACCOUNTSTATUS_ACTIVE,
             self::ACCOUNTSTATUS_SUSPENDED => self::ACCOUNTSTATUS_SUSPENDED,
+        ];
+    }
+    
+    /**
+     * get column recordStatus enum value label
+     * @param string $value
+     * @return string
+     */
+    public static function getRecordStatusValueLabel($value)
+    {
+        $labels = self::optsRecordStatus();
+
+        if(isset($labels[$value])) {
+            return $labels[$value];
+        }
+
+        return $value;
+    }
+
+    /**
+     * column recordStatus ENUM value labels
+     * @return array
+     */
+    public static function optsRecordStatus()
+    {
+        return [
+            self::RECORDSTATUS_ACTIVE => self::RECORDSTATUS_ACTIVE,
+            self::RECORDSTATUS_DELETED => self::RECORDSTATUS_DELETED,
         ];
     }
     

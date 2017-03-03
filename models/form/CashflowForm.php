@@ -40,15 +40,20 @@ class CashflowForm extends Cashflow
           /* value limitation */
           /* value references */
           [['cashflowType_id', 'number', 'date', 'account_id'], 'required'],
-          [['cashflowType_id', 'account_id', 'approved_at', 'approved_by'], 'integer'],
+          [['cashflowType_id', 'account_id', 'approved_at', 'approved_by', 'deleted_at', 'deleted_by'], 'integer'],
           [['date'], 'safe'],
-          [['approval', 'notes'], 'string'],
+          [['approval', 'notes', 'recordStatus'], 'string'],
           [['number'], 'string', 'max' => 32],
           [['cashflowType_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\CashflowType::className(), 'targetAttribute' => ['cashflowType_id' => 'id']],
           [['account_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Account::className(), 'targetAttribute' => ['account_id' => 'id']],
           ['approval', 'in', 'range' => [
                     self::APPROVAL_PENDING,
                     self::APPROVAL_APPROVED,
+                ]
+            ],
+          ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
                 ]
             ],
         ];

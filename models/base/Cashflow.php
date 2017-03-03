@@ -5,6 +5,8 @@
 namespace app\models\base;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the base-model class for table "cashflow".
@@ -18,6 +20,13 @@ use Yii;
  * @property string $notes
  * @property integer $approved_at
  * @property integer $approved_by
+ * @property string $recordStatus
+ * @property integer $deleted_at
+ * @property integer $deleted_by
+ * @property integer $created_at
+ * @property integer $created_by
+ * @property integer $updated_at
+ * @property integer $updated_by
  *
  * @property \app\models\CashflowType $cashflowType
  * @property \app\models\Account $account
@@ -32,6 +41,8 @@ abstract class Cashflow extends \yii\db\ActiveRecord
      */
     const APPROVAL_PENDING = 'pending';
     const APPROVAL_APPROVED = 'approved';
+    const RECORDSTATUS_ACTIVE = 'active';
+    const RECORDSTATUS_DELETED = 'deleted';
 
     var $enum_labels = false;
     
@@ -46,19 +57,39 @@ abstract class Cashflow extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [
+            'blameable' => [
+                'class' => BlameableBehavior::className(),
+            ],
+            'timestamp' => [
+                'class' => TimestampBehavior::className(),
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
             [['cashflowType_id', 'number', 'date', 'account_id'], 'required'],
-            [['cashflowType_id', 'account_id', 'approved_at', 'approved_by'], 'integer'],
+            [['cashflowType_id', 'account_id', 'approved_at', 'approved_by', 'deleted_at', 'deleted_by'], 'integer'],
             [['date'], 'safe'],
-            [['approval', 'notes'], 'string'],
+            [['approval', 'notes', 'recordStatus'], 'string'],
             [['number'], 'string', 'max' => 32],
             [['cashflowType_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\CashflowType::className(), 'targetAttribute' => ['cashflowType_id' => 'id']],
             [['account_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Account::className(), 'targetAttribute' => ['account_id' => 'id']],
             ['approval', 'in', 'range' => [
                     self::APPROVAL_PENDING,
                     self::APPROVAL_APPROVED,
+                ]
+            ],
+            ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
                 ]
             ]
         ];
@@ -79,6 +110,13 @@ abstract class Cashflow extends \yii\db\ActiveRecord
             'notes' => 'Notes',
             'approved_at' => 'Approved At',
             'approved_by' => 'Approved By',
+            'recordStatus' => 'Record Status',
+            'created_at' => 'Created At',
+            'created_by' => 'Created By',
+            'updated_at' => 'Updated At',
+            'updated_by' => 'Updated By',
+            'deleted_at' => 'Deleted At',
+            'deleted_by' => 'Deleted By',
         ];
     }
         
@@ -131,6 +169,34 @@ abstract class Cashflow extends \yii\db\ActiveRecord
         return [
             self::APPROVAL_PENDING => self::APPROVAL_PENDING,
             self::APPROVAL_APPROVED => self::APPROVAL_APPROVED,
+        ];
+    }
+    
+    /**
+     * get column recordStatus enum value label
+     * @param string $value
+     * @return string
+     */
+    public static function getRecordStatusValueLabel($value)
+    {
+        $labels = self::optsRecordStatus();
+
+        if(isset($labels[$value])) {
+            return $labels[$value];
+        }
+
+        return $value;
+    }
+
+    /**
+     * column recordStatus ENUM value labels
+     * @return array
+     */
+    public static function optsRecordStatus()
+    {
+        return [
+            self::RECORDSTATUS_ACTIVE => self::RECORDSTATUS_ACTIVE,
+            self::RECORDSTATUS_DELETED => self::RECORDSTATUS_DELETED,
         ];
     }
     

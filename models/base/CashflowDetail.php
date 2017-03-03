@@ -5,6 +5,8 @@
 namespace app\models\base;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the base-model class for table "cashflowDetail".
@@ -16,6 +18,13 @@ use Yii;
  * @property integer $budgetItem_id
  * @property string $notes
  * @property integer $monthlyBudgetItem_id
+ * @property string $recordStatus
+ * @property integer $deleted_at
+ * @property integer $deleted_by
+ * @property integer $created_at
+ * @property integer $created_by
+ * @property integer $updated_at
+ * @property integer $updated_by
  *
  * @property \app\models\Cashflow $cashflow
  * @property \app\models\BudgetItem $budgetItem
@@ -30,6 +39,8 @@ abstract class CashflowDetail extends \yii\db\ActiveRecord
      */
     const FLOW_DEBIT = 'debit';
     const FLOW_CREDIT = 'credit';
+    const RECORDSTATUS_ACTIVE = 'active';
+    const RECORDSTATUS_DELETED = 'deleted';
 
     var $enum_labels = false;
     
@@ -44,12 +55,27 @@ abstract class CashflowDetail extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        return [
+            'blameable' => [
+                'class' => BlameableBehavior::className(),
+            ],
+            'timestamp' => [
+                'class' => TimestampBehavior::className(),
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         return [
             [['cashflow_id', 'flow', 'nominal', 'budgetItem_id'], 'required'],
-            [['cashflow_id', 'budgetItem_id', 'monthlyBudgetItem_id'], 'integer'],
-            [['flow', 'notes'], 'string'],
+            [['cashflow_id', 'budgetItem_id', 'monthlyBudgetItem_id', 'deleted_at', 'deleted_by'], 'integer'],
+            [['flow', 'notes', 'recordStatus'], 'string'],
             [['nominal'], 'number'],
             [['cashflow_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Cashflow::className(), 'targetAttribute' => ['cashflow_id' => 'id']],
             [['budgetItem_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\BudgetItem::className(), 'targetAttribute' => ['budgetItem_id' => 'id']],
@@ -57,6 +83,11 @@ abstract class CashflowDetail extends \yii\db\ActiveRecord
             ['flow', 'in', 'range' => [
                     self::FLOW_DEBIT,
                     self::FLOW_CREDIT,
+                ]
+            ],
+            ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
                 ]
             ]
         ];
@@ -75,6 +106,13 @@ abstract class CashflowDetail extends \yii\db\ActiveRecord
             'budgetItem_id' => 'Budget Item',
             'notes' => 'Notes',
             'monthlyBudgetItem_id' => 'Monthly Budget Item',
+            'recordStatus' => 'Record Status',
+            'created_at' => 'Created At',
+            'created_by' => 'Created By',
+            'updated_at' => 'Updated At',
+            'updated_by' => 'Updated By',
+            'deleted_at' => 'Deleted At',
+            'deleted_by' => 'Deleted By',
         ];
     }
         
@@ -127,6 +165,34 @@ abstract class CashflowDetail extends \yii\db\ActiveRecord
         return [
             self::FLOW_DEBIT => self::FLOW_DEBIT,
             self::FLOW_CREDIT => self::FLOW_CREDIT,
+        ];
+    }
+    
+    /**
+     * get column recordStatus enum value label
+     * @param string $value
+     * @return string
+     */
+    public static function getRecordStatusValueLabel($value)
+    {
+        $labels = self::optsRecordStatus();
+
+        if(isset($labels[$value])) {
+            return $labels[$value];
+        }
+
+        return $value;
+    }
+
+    /**
+     * column recordStatus ENUM value labels
+     * @return array
+     */
+    public static function optsRecordStatus()
+    {
+        return [
+            self::RECORDSTATUS_ACTIVE => self::RECORDSTATUS_ACTIVE,
+            self::RECORDSTATUS_DELETED => self::RECORDSTATUS_DELETED,
         ];
     }
     

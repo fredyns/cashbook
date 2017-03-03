@@ -15,7 +15,7 @@ use app\models\base\BudgetItem as BaseBudgetItem;
 class BudgetItem extends BaseBudgetItem
 {
 
-    use ModelTool, ModelBlame;
+    use ModelTool, ModelBlame, ModelSoftDelete;
     
 
     /**

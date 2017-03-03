@@ -40,7 +40,14 @@ class CashflowTypeForm extends CashflowType
           /* value limitation */
           /* value references */
           [['name'], 'required'],
+          [['recordStatus'], 'string'],
+          [['deleted_at', 'deleted_by'], 'integer'],
           [['name'], 'string', 'max' => 45],
+          ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
+                ]
+            ],
         ];
     }
 

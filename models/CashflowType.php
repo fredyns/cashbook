@@ -15,7 +15,7 @@ use app\models\base\CashflowType as BaseCashflowType;
 class CashflowType extends BaseCashflowType
 {
 
-    use ModelTool, ModelBlame;
+    use ModelTool, ModelBlame, ModelSoftDelete;
     
 
     /**

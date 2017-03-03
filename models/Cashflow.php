@@ -15,7 +15,7 @@ use app\models\base\Cashflow as BaseCashflow;
 class Cashflow extends BaseCashflow
 {
 
-    use ModelTool, ModelBlame;
+    use ModelTool, ModelBlame, ModelSoftDelete;
     
 
     /**

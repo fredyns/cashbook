@@ -40,14 +40,19 @@ class AccountForm extends Account
           /* value limitation */
           /* value references */
           [['owner_uid', 'number', 'name', 'currency'], 'required'],
-          [['owner_uid'], 'integer'],
-          [['accountStatus'], 'string'],
+          [['owner_uid', 'deleted_at', 'deleted_by'], 'integer'],
+          [['accountStatus', 'recordStatus'], 'string'],
           [['number'], 'string', 'max' => 32],
           [['name'], 'string', 'max' => 255],
           [['currency'], 'string', 'max' => 8],
           ['accountStatus', 'in', 'range' => [
                     self::ACCOUNTSTATUS_ACTIVE,
                     self::ACCOUNTSTATUS_SUSPENDED,
+                ]
+            ],
+          ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
                 ]
             ],
         ];

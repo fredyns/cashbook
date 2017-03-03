@@ -15,7 +15,7 @@ use app\models\base\Account as BaseAccount;
 class Account extends BaseAccount
 {
 
-    use ModelTool, ModelBlame;
+    use ModelTool, ModelBlame, ModelSoftDelete;
     
 
     /**

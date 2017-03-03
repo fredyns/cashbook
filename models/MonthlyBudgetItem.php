@@ -15,7 +15,7 @@ use app\models\base\MonthlyBudgetItem as BaseMonthlyBudgetItem;
 class MonthlyBudgetItem extends BaseMonthlyBudgetItem
 {
 
-    use ModelTool, ModelBlame;
+    use ModelTool, ModelBlame, ModelSoftDelete;
     
 
     /**

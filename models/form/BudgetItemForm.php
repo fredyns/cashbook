@@ -40,8 +40,15 @@ class BudgetItemForm extends BudgetItem
           /* value limitation */
           /* value references */
           [['code'], 'required'],
+          [['recordStatus'], 'string'],
+          [['deleted_at', 'deleted_by'], 'integer'],
           [['code'], 'string', 'max' => 64],
           [['description'], 'string', 'max' => 255],
+          ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
+                ]
+            ],
         ];
     }
 
