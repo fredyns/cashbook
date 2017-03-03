@@ -15,8 +15,9 @@ use app\models\base\MonthlyBudgetItem as BaseMonthlyBudgetItem;
 class MonthlyBudgetItem extends BaseMonthlyBudgetItem
 {
 
-    use ModelTool, ModelBlame, ModelSoftDelete;
-    
+    use ModelTool,
+        ModelBlame,
+        ModelSoftDelete;
 
     /**
      * @inheritdoc
@@ -24,10 +25,9 @@ class MonthlyBudgetItem extends BaseMonthlyBudgetItem
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -37,10 +37,69 @@ class MonthlyBudgetItem extends BaseMonthlyBudgetItem
     public function rules()
     {
         return ArrayHelper::merge(
-             parent::rules(),
-             [
-                  # custom validation rules
-             ]
+                parent::rules(), [
+                # custom validation rules
+                ]
         );
+    }
+
+    /**
+     * get column month enum value label
+     * @param string $value
+     * @return string
+     */
+    public static function getMonthValueLabel($value, $nickname = false)
+    {
+        $labels = $nickname ? self::optsMonthNick() : self::optsMonth();
+
+        if (isset($labels[$value])) {
+            return $labels[$value];
+        }
+
+        return $value;
+    }
+
+    /**
+     * column month ENUM value labels
+     * @return array
+     */
+    public static function optsMonth()
+    {
+        return [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+    }
+
+    /**
+     * column month ENUM value labels
+     * @return array
+     */
+    public static function optsMonthNick()
+    {
+        return [
+            1 => 'Jan',
+            2 => 'Feb',
+            3 => 'Mar',
+            4 => 'Apr',
+            5 => 'Mei',
+            6 => 'Jun',
+            7 => 'Jul',
+            8 => 'Agt',
+            9 => 'Sep',
+            10 => 'Okt',
+            11 => 'Nov',
+            12 => 'Des',
+        ];
     }
 }
