@@ -1,0 +1,57 @@
+<?php
+
+namespace app\models\form;
+
+use Yii;
+use yii\helpers\ArrayHelper;
+use fredyns\suite\helpers\StringHelper;
+use app\models\CashflowDetail;
+
+/**
+ * This is the form model class for table "cashflowDetail".
+ */
+class CashflowDetailForm extends CashflowDetail
+{
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return ArrayHelper::merge(
+            parent::behaviors(),
+            [
+                # custom behaviors
+            ]
+        );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+          /* filter */
+          /* default value */
+          /* required */
+          /* safe */
+          /* field type */
+          /* value limitation */
+          /* value references */
+          [['cashflow_id', 'flow', 'nominal', 'budgetItem_id'], 'required'],
+          [['cashflow_id', 'budgetItem_id', 'monthlyBudgetItem_id'], 'integer'],
+          [['flow', 'notes'], 'string'],
+          [['nominal'], 'number'],
+          [['cashflow_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Cashflow::className(), 'targetAttribute' => ['cashflow_id' => 'id']],
+          [['budgetItem_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\BudgetItem::className(), 'targetAttribute' => ['budgetItem_id' => 'id']],
+          [['monthlyBudgetItem_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\MonthlyBudgetItem::className(), 'targetAttribute' => ['monthlyBudgetItem_id' => 'id']],
+          ['flow', 'in', 'range' => [
+                    self::FLOW_DEBIT,
+                    self::FLOW_CREDIT,
+                ]
+            ],
+        ];
+    }
+
+}
