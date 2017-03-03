@@ -53,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'actionControl' => 'app\actioncontrols\BudgetItemActControl',
                     'attribute' => 'code',
                 ],
-                'description',
+                //'description',
                 [
                     'class' => 'fredyns\suite\grid\KartikActionColumn',
                     'actionControl' => 'app\actioncontrols\BudgetItemActControl',
