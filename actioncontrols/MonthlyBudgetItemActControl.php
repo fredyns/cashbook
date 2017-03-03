@@ -32,9 +32,9 @@ class MonthlyBudgetItemActControl extends \fredyns\suite\libraries\ActionControl
     public function breadcrumbLabels()
     {
         return ArrayHelper::merge(
-            parent::breadcrumbLabels(), [
+                parent::breadcrumbLabels(), [
                 'index' => 'MonthlyBudgetItem',
-            ]
+                ]
         );
     }
 
@@ -43,7 +43,7 @@ class MonthlyBudgetItemActControl extends \fredyns\suite\libraries\ActionControl
      */
     public function modelLabel()
     {
-        return parent::modelLabel();
+        return MonthlyBudgetItem::getMonthValueLabel($this->model->month, true)." '".($this->model->year - 2000);
     }
 
     /**
@@ -69,7 +69,7 @@ class MonthlyBudgetItemActControl extends \fredyns\suite\libraries\ActionControl
     {
         return ArrayHelper::merge(
                 parent::actionPersistentModel(), [
-                    #  additional action name
+                #  additional action name
                 ]
         );
     }
@@ -81,7 +81,7 @@ class MonthlyBudgetItemActControl extends \fredyns\suite\libraries\ActionControl
     {
         return ArrayHelper::merge(
                 parent::actionUnspecifiedModel(), [
-                    # additional action name
+                # additional action name
                 ]
         );
     }
@@ -95,7 +95,7 @@ class MonthlyBudgetItemActControl extends \fredyns\suite\libraries\ActionControl
                 parent::actions(),
                 [
                 /* / action sample / */
-                
+
                 # 'action_name' => [
                 #     'label'         => 'Action_Label',
                 #     'url'           => $this->urlAction,
@@ -122,8 +122,7 @@ class MonthlyBudgetItemActControl extends \fredyns\suite\libraries\ActionControl
     {
         return true;
     }
-
-    ################################ sample : additional action ################################ 
+    ################################ sample : additional action ################################
 
     /**
      * get URL param to do action
@@ -132,10 +131,9 @@ class MonthlyBudgetItemActControl extends \fredyns\suite\libraries\ActionControl
      */
     public function getUrlAction()
     {
-        if ($this->model instanceof ActiveRecord)
-        {
-            $param       = $this->modelParam();
-            $param[0]    = $this->actionRoute('action_slug');
+        if ($this->model instanceof ActiveRecord) {
+            $param = $this->modelParam();
+            $param[0] = $this->actionRoute('action_slug');
             $param['ru'] = ReturnUrl::getToken();
 
             return $param;
@@ -153,5 +151,4 @@ class MonthlyBudgetItemActControl extends \fredyns\suite\libraries\ActionControl
     {
         return true;
     }
-
 }
