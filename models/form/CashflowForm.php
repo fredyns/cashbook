@@ -19,10 +19,9 @@ class CashflowForm extends Cashflow
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -32,31 +31,51 @@ class CashflowForm extends Cashflow
     public function rules()
     {
         return [
-          /* filter */
-          /* default value */
-          /* required */
-          /* safe */
-          /* field type */
-          /* value limitation */
-          /* value references */
-          [['cashflowType_id', 'number', 'date', 'account_id'], 'required'],
-          [['cashflowType_id', 'account_id', 'approved_at', 'approved_by', 'deleted_at', 'deleted_by'], 'integer'],
-          [['date'], 'safe'],
-          [['approval', 'notes', 'recordStatus'], 'string'],
-          [['number'], 'string', 'max' => 32],
-          [['cashflowType_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\CashflowType::className(), 'targetAttribute' => ['cashflowType_id' => 'id']],
-          [['account_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Account::className(), 'targetAttribute' => ['account_id' => 'id']],
-          ['approval', 'in', 'range' => [
+            /* filter */
+            [
+                ['number', 'notes'],
+                'filter',
+                'filter' => function($value) {
+                    return StringHelper::plaintextFilter($value);
+                },
+            ],
+            /* default value */
+            [['approval'], 'default', 'value' => static::APPROVAL_PENDING],
+            [['recordStatus'], 'default', 'value' => static::RECORDSTATUS_ACTIVE],
+            /* required */
+            [['cashflowType_id', 'number', 'date', 'account_id'], 'required'],
+            /* safe */
+            /* field type */
+            [['cashflowType_id', 'account_id'], 'integer'],
+            [['approval', 'notes', 'recordStatus'], 'string'],
+            [['number'], 'string', 'max' => 32],
+            [['date'], 'date', 'format' => 'php:Y-m-d'],
+            /* value limitation */
+            ['approval', 'in', 'range' => [
                     self::APPROVAL_PENDING,
                     self::APPROVAL_APPROVED,
                 ]
             ],
-          ['recordStatus', 'in', 'range' => [
+            ['recordStatus', 'in', 'range' => [
                     self::RECORDSTATUS_ACTIVE,
                     self::RECORDSTATUS_DELETED,
                 ]
             ],
+            /* value references */
+            [
+                ['cashflowType_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => \app\models\CashflowType::className(),
+                'targetAttribute' => ['cashflowType_id' => 'id'],
+            ],
+            [
+                ['account_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => \app\models\Account::className(),
+                'targetAttribute' => ['account_id' => 'id'],
+            ],
         ];
     }
-
 }

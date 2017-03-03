@@ -19,10 +19,9 @@ class MonthlyBudgetItemForm extends MonthlyBudgetItem
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -32,25 +31,39 @@ class MonthlyBudgetItemForm extends MonthlyBudgetItem
     public function rules()
     {
         return [
-          /* filter */
-          /* default value */
-          /* required */
-          /* safe */
-          /* field type */
-          /* value limitation */
-          /* value references */
-          [['year', 'month', 'budgetItem_id'], 'required'],
-          [['year'], 'safe'],
-          [['month', 'budgetItem_id', 'deleted_at', 'deleted_by'], 'integer'],
-          [['openBalance', 'debit', 'credit', 'closingBalance'], 'number'],
-          [['recordStatus'], 'string'],
-          [['budgetItem_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\BudgetItem::className(), 'targetAttribute' => ['budgetItem_id' => 'id']],
-          ['recordStatus', 'in', 'range' => [
+            /* filter */
+            /* default value */
+            [['openBalance', 'debit', 'credit'], 'default', 'value' => 0],
+            [['recordStatus'], 'default', 'value' => static::RECORDSTATUS_ACTIVE],
+            [['year'], 'default', 'value' => date('Y')],
+            /* required */
+            [['year', 'month', 'budgetItem_id'], 'required'],
+            /* safe */
+            /* field type */
+            [['budgetItem_id'], 'integer'],
+            [['month'], 'integer', 'min' => 1, 'max' => 12],
+            [['openBalance', 'debit', 'credit', 'closingBalance'], 'number'],
+            [['recordStatus'], 'string'],
+            [['year'], 'date', 'format' => 'php:Y'],
+            /* value limitation */
+            [
+                ['year', 'month', 'budgetItem_id'],
+                'unique',
+                'targetAttribute' => ['year', 'month', 'budgetItem_id'],
+            ],
+            ['recordStatus', 'in', 'range' => [
                     self::RECORDSTATUS_ACTIVE,
                     self::RECORDSTATUS_DELETED,
                 ]
             ],
+            /* value references */
+            [
+                ['budgetItem_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => \app\models\BudgetItem::className(),
+                'targetAttribute' => ['budgetItem_id' => 'id'],
+            ],
         ];
     }
-
 }

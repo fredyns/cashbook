@@ -19,10 +19,9 @@ class AccountForm extends Account
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -32,30 +31,46 @@ class AccountForm extends Account
     public function rules()
     {
         return [
-          /* filter */
-          /* default value */
-          /* required */
-          /* safe */
-          /* field type */
-          /* value limitation */
-          /* value references */
-          [['owner_uid', 'number', 'name', 'currency'], 'required'],
-          [['owner_uid', 'deleted_at', 'deleted_by'], 'integer'],
-          [['accountStatus', 'recordStatus'], 'string'],
-          [['number'], 'string', 'max' => 32],
-          [['name'], 'string', 'max' => 255],
-          [['currency'], 'string', 'max' => 8],
-          ['accountStatus', 'in', 'range' => [
+            /* filter */
+            [
+                ['number', 'name', 'currency'],
+                'filter',
+                'filter' => function($value) {
+                    return StringHelper::plaintextFilter($value);
+                },
+            ],
+            [
+                ['currency'],
+                'filter',
+                'filter' => function($value) {
+                    return strtoupper($value);
+                },
+            ],
+            /* default value */
+            [['currency'], 'default', 'value' => 'IDR'],
+            [['accountStatus'], 'default', 'value' => static::ACCOUNTSTATUS_ACTIVE],
+            [['recordStatus'], 'default', 'value' => static::RECORDSTATUS_ACTIVE],
+            /* required */
+            [['owner_uid', 'number', 'name', 'currency'], 'required'],
+            /* safe */
+            /* field type */
+            [['owner_uid'], 'integer'],
+            [['accountStatus', 'recordStatus'], 'string'],
+            [['number'], 'string', 'max' => 32],
+            [['name'], 'string', 'max' => 255],
+            [['currency'], 'string', 'max' => 8],
+            /* value limitation */
+            ['accountStatus', 'in', 'range' => [
                     self::ACCOUNTSTATUS_ACTIVE,
                     self::ACCOUNTSTATUS_SUSPENDED,
                 ]
             ],
-          ['recordStatus', 'in', 'range' => [
+            ['recordStatus', 'in', 'range' => [
                     self::RECORDSTATUS_ACTIVE,
                     self::RECORDSTATUS_DELETED,
                 ]
             ],
+            /* value references */
         ];
     }
-
 }

@@ -19,10 +19,9 @@ class BudgetItemForm extends BudgetItem
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -32,24 +31,30 @@ class BudgetItemForm extends BudgetItem
     public function rules()
     {
         return [
-          /* filter */
-          /* default value */
-          /* required */
-          /* safe */
-          /* field type */
-          /* value limitation */
-          /* value references */
-          [['code'], 'required'],
-          [['recordStatus'], 'string'],
-          [['deleted_at', 'deleted_by'], 'integer'],
-          [['code'], 'string', 'max' => 64],
-          [['description'], 'string', 'max' => 255],
-          ['recordStatus', 'in', 'range' => [
+            /* filter */
+            [
+                ['code', 'description'],
+                'filter',
+                'filter' => function($value) {
+                    return StringHelper::plaintextFilter($value);
+                },
+            ],
+            /* default value */
+            [['recordStatus'], 'default', 'value' => static::RECORDSTATUS_ACTIVE],
+            /* required */
+            [['code'], 'required'],
+            /* safe */
+            /* field type */
+            [['recordStatus'], 'string'],
+            [['code'], 'string', 'max' => 64],
+            [['description'], 'string', 'max' => 255],
+            /* value limitation */
+            ['recordStatus', 'in', 'range' => [
                     self::RECORDSTATUS_ACTIVE,
                     self::RECORDSTATUS_DELETED,
                 ]
             ],
+            /* value references */
         ];
     }
-
 }

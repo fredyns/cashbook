@@ -19,10 +19,9 @@ class CashflowDetailForm extends CashflowDetail
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -32,31 +31,56 @@ class CashflowDetailForm extends CashflowDetail
     public function rules()
     {
         return [
-          /* filter */
-          /* default value */
-          /* required */
-          /* safe */
-          /* field type */
-          /* value limitation */
-          /* value references */
-          [['cashflow_id', 'flow', 'nominal', 'budgetItem_id'], 'required'],
-          [['cashflow_id', 'budgetItem_id', 'monthlyBudgetItem_id', 'deleted_at', 'deleted_by'], 'integer'],
-          [['flow', 'notes', 'recordStatus'], 'string'],
-          [['nominal'], 'number'],
-          [['cashflow_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Cashflow::className(), 'targetAttribute' => ['cashflow_id' => 'id']],
-          [['budgetItem_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\BudgetItem::className(), 'targetAttribute' => ['budgetItem_id' => 'id']],
-          [['monthlyBudgetItem_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\MonthlyBudgetItem::className(), 'targetAttribute' => ['monthlyBudgetItem_id' => 'id']],
-          ['flow', 'in', 'range' => [
+            /* filter */
+            [
+                ['notes'],
+                'filter',
+                'filter' => function($value) {
+                    return StringHelper::plaintextFilter($value);
+                },
+            ],
+            /* default value */
+            [['recordStatus'], 'default', 'value' => static::RECORDSTATUS_ACTIVE],
+            /* required */
+            [['cashflow_id', 'flow', 'nominal', 'budgetItem_id'], 'required'],
+            /* safe */
+            /* field type */
+            [['cashflow_id', 'budgetItem_id', 'monthlyBudgetItem_id'], 'integer'],
+            [['flow', 'notes', 'recordStatus'], 'string'],
+            [['nominal'], 'number'],
+            /* value limitation */
+            ['flow', 'in', 'range' => [
                     self::FLOW_DEBIT,
                     self::FLOW_CREDIT,
                 ]
             ],
-          ['recordStatus', 'in', 'range' => [
+            ['recordStatus', 'in', 'range' => [
                     self::RECORDSTATUS_ACTIVE,
                     self::RECORDSTATUS_DELETED,
                 ]
             ],
+            /* value references */
+            [
+                ['cashflow_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => \app\models\Cashflow::className(),
+                'targetAttribute' => ['cashflow_id' => 'id'],
+            ],
+            [
+                ['budgetItem_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => \app\models\BudgetItem::className(),
+                'targetAttribute' => ['budgetItem_id' => 'id'],
+            ],
+            [
+                ['monthlyBudgetItem_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => \app\models\MonthlyBudgetItem::className(),
+                'targetAttribute' => ['monthlyBudgetItem_id' => 'id'],
+            ],
         ];
     }
-
 }
