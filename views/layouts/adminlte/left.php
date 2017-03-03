@@ -67,27 +67,46 @@ use fredyns\suite\helpers\ActiveUser;
                 'options' => ['class' => 'sidebar-menu'],
                 'items' => [
                     [
-                        'label' => Yii::t('app', 'Main Menu'),
+                        'label' => Yii::t('app', 'Transaction'),
                         'options' => ['class' => 'header'],
                     ],
                     [
-                        'label' => Yii::t('app', '___'),
+                        'label' => Yii::t('app', 'Cashflow'),
                         'encode' => FALSE,
                         'icon' => 'fa fa-cubes',
-                        'url' => ['/___'],
+                        'url' => ['/cashflow'],
                     ],
                     [
-                        'label' => Yii::t('app', 'Other'),
-                        'icon' => 'fa fa-table',
-                        'url' => '#',
-                        'items' => [
-                            [
-                                'label' => Yii::t('app', '___'),
-                                'encode' => FALSE,
-                                'icon' => 'fa fa-cubes',
-                                'url' => ['/___'],
-                            ],
-                        ],
+                        'label' => Yii::t('app', 'Monthly Book'),
+                        'options' => ['class' => 'header'],
+                    ],
+                    [
+                        'label' => Yii::t('app', 'Monthly Budget Item'),
+                        'encode' => FALSE,
+                        'icon' => 'fa fa-cubes',
+                        'url' => ['/monthly-budget-item'],
+                    ],
+                    [
+                        'label' => Yii::t('app', 'Master'),
+                        'options' => ['class' => 'header'],
+                    ],
+                    [
+                        'label' => Yii::t('app', 'Account'),
+                        'encode' => FALSE,
+                        'icon' => 'fa fa-cubes',
+                        'url' => ['/account'],
+                    ],
+                    [
+                        'label' => Yii::t('app', 'Budget Item'),
+                        'encode' => FALSE,
+                        'icon' => 'fa fa-cubes',
+                        'url' => ['/budget-item'],
+                    ],
+                    [
+                        'label' => Yii::t('app', 'Cashflow Type'),
+                        'encode' => FALSE,
+                        'icon' => 'fa fa-cubes',
+                        'url' => ['/cashflow-type'],
                     ],
                     [
                         'label' => 'Administrator',
