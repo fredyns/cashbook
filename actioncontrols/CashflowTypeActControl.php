@@ -113,6 +113,15 @@ class CashflowTypeActControl extends \fredyns\suite\libraries\ActionControl
         );
     }
 
+    /**
+     * check permission to access Deleted page
+     *
+     * @return boolean
+     */
+    public function getAllowDeleted($params = [])
+    {
+        return true;
+    }
 
     ################################ sample : additional action ################################ 
 
