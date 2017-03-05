@@ -15,8 +15,9 @@ use app\models\base\BudgetItem as BaseBudgetItem;
 class BudgetItem extends BaseBudgetItem
 {
 
-    use ModelTool, ModelBlame, ModelSoftDelete;
-    
+    use ModelTool,
+        ModelBlame,
+        ModelSoftDelete;
 
     /**
      * @inheritdoc
@@ -24,10 +25,9 @@ class BudgetItem extends BaseBudgetItem
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -37,10 +37,19 @@ class BudgetItem extends BaseBudgetItem
     public function rules()
     {
         return ArrayHelper::merge(
-             parent::rules(),
-             [
-                  # custom validation rules
-             ]
+                parent::rules(), [
+                # custom validation rules
+                ]
         );
+    }
+
+    /**
+     * provide data options from model
+     *
+     * @return array
+     */
+    public static function options()
+    {
+        return ArrayHelper::map(static::findAll(['recordStatus' => 'active']), 'id', 'code');
     }
 }
