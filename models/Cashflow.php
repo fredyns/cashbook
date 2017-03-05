@@ -8,15 +8,20 @@ use fredyns\suite\traits\ModelTool;
 use fredyns\suite\traits\ModelBlame;
 use fredyns\suite\traits\ModelSoftDelete;
 use app\models\base\Cashflow as BaseCashflow;
+use fredyns\suite\models\Profile;
 
 /**
  * This is the model class for table "cashflow".
+ *
+ * @property Profile $approvedBy
  */
 class Cashflow extends BaseCashflow
 {
 
-    use ModelTool, ModelBlame, ModelSoftDelete;
-    
+    use ModelTool,
+        ModelBlame,
+        ModelSoftDelete;
+    const ALIAS_APPROVEDBY = 'approvedBy';
 
     /**
      * @inheritdoc
@@ -24,10 +29,9 @@ class Cashflow extends BaseCashflow
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -37,10 +41,19 @@ class Cashflow extends BaseCashflow
     public function rules()
     {
         return ArrayHelper::merge(
-             parent::rules(),
-             [
-                  # custom validation rules
-             ]
+                parent::rules(), [
+                # custom validation rules
+                ]
         );
+    }
+
+    /**
+     * Getting blamable Profile model for approval
+     *
+     * @return Profile
+     */
+    public function getApprovedBy()
+    {
+        return $this->getBlamedProfile('approved_by', static::ALIAS_APPROVEDBY);
     }
 }
