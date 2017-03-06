@@ -49,9 +49,13 @@ class BudgetItemController extends \yii\rest\ActiveController
             $query = new Query;
 
             $query
-                ->select('id, code AS text')
+                ->select("id, CONCAT(code, ' - ', description) AS text")
                 ->from('budgetItem')
-                ->where(['like', 'code', $q])
+                ->where([
+                    'or',
+                    ['like', 'code', $q],
+                    ['like', 'description', $q]
+                ])
                 ->limit(20);
 
             $command = $query->createCommand();
@@ -63,7 +67,7 @@ class BudgetItemController extends \yii\rest\ActiveController
             if ($model) {
                 $out['results'] = [
                     'id' => $id,
-                    'text' => $model->name,
+                    'text' => $model->label,
                 ];
             }
         }
