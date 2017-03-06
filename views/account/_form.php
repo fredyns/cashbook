@@ -39,9 +39,9 @@ use dmstr\bootstrap\Tabs;
             $form->field($model, 'name')->textInput(['maxlength' => true])
             ?>
 
-            <!-- attribute owner_uid -->
+            <!-- attribute cif -->
             <?=
-            $form->field($model, 'owner_uid')->textInput()
+            $form->field($model, 'cif')->textInput()
             ?>
 
             <!-- attribute currency -->

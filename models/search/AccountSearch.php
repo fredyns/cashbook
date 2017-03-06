@@ -22,14 +22,14 @@ class AccountSearch extends Account
         return [
             /* filter */
             [
-                ['number', 'name', 'currency'],
+                ['cif', 'number', 'name', 'currency'],
                 'filter',
                 'filter' => function($value) {
                     return StringHelper::plaintextFilter($value);
                 },
             ],
             /* field type */
-            [['id', 'owner_uid'], 'integer'],
+            [['id'], 'integer'],
             [['accountStatus', 'recordStatus'], 'string'],
             /* value limitation */
             ['accountStatus', 'in', 'range' => [
@@ -113,12 +113,12 @@ class AccountSearch extends Account
         $query
             ->andFilterWhere([
                 'id' => $this->id,
-                'owner_uid' => $this->owner_uid,
                 'accountStatus' => $this->accountStatus,
                 'recordStatus' => $this->recordStatus,
         ]);
 
         $query
+            ->andFilterWhere(['like', 'cif', $this->cif])
             ->andFilterWhere(['like', 'number', $this->number])
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'currency', $this->currency]);

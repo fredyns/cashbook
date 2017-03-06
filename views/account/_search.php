@@ -12,12 +12,12 @@ use yii\widgets\ActiveForm;
 
     <?php
     $form = ActiveForm::begin([
-        'action' => ['index'],
-        'method' => 'get',
+            'action' => ['index'],
+            'method' => 'get',
     ]);
     ?>
 
-    <?= $form->field($model, 'owner_uid') ?>
+    <?= $form->field($model, 'cif') ?>
 
     <?= $form->field($model, 'number') ?>
 
