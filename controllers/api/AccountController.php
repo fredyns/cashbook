@@ -49,9 +49,13 @@ class AccountController extends \yii\rest\ActiveController
             $query = new Query;
 
             $query
-                ->select('id, name AS text')
+                ->select("id, CONCAT(number, ' - ', name) AS text")
                 ->from('account')
-                ->where(['like', 'name', $q])
+                ->where([
+                    'or',
+                    ['like', 'number', $q],
+                    ['like', 'name', $q],
+                ])
                 ->limit(20);
 
             $command = $query->createCommand();
@@ -63,7 +67,7 @@ class AccountController extends \yii\rest\ActiveController
             if ($model) {
                 $out['results'] = [
                     'id' => $id,
-                    'text' => $model->name,
+                    'text' => $model->label,
                 ];
             }
         }
