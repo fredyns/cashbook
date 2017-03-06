@@ -11,6 +11,8 @@ use app\models\base\BudgetItem as BaseBudgetItem;
 
 /**
  * This is the model class for table "budgetItem".
+ *
+ * @property string $label model label
  */
 class BudgetItem extends BaseBudgetItem
 {
@@ -42,6 +44,16 @@ class BudgetItem extends BaseBudgetItem
                 # custom validation rules
                 ]
         );
+    }
+
+    /**
+     * model label
+     *
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->code.' - '.$this->description;
     }
 
     /**
