@@ -51,15 +51,16 @@ class AccountForm extends Account
             [['accountStatus'], 'default', 'value' => static::ACCOUNTSTATUS_ACTIVE],
             [['recordStatus'], 'default', 'value' => static::RECORDSTATUS_ACTIVE],
             /* required */
-            [['owner_uid', 'number', 'name', 'currency'], 'required'],
+            [['cif', 'number', 'name', 'currency'], 'required'],
             /* safe */
             /* field type */
-            [['owner_uid'], 'integer'],
             [['accountStatus', 'recordStatus'], 'string'],
-            [['number'], 'string', 'max' => 32],
+            [['cif', 'number'], 'string', 'max' => 32],
             [['name'], 'string', 'max' => 255],
             [['currency'], 'string', 'max' => 8],
             /* value limitation */
+            ['cif', 'unique'],
+            ['number', 'unique'],
             ['accountStatus', 'in', 'range' => [
                     self::ACCOUNTSTATUS_ACTIVE,
                     self::ACCOUNTSTATUS_SUSPENDED,

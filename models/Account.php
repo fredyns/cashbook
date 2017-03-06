@@ -15,8 +15,9 @@ use app\models\base\Account as BaseAccount;
 class Account extends BaseAccount
 {
 
-    use ModelTool, ModelBlame, ModelSoftDelete;
-    
+    use ModelTool,
+        ModelBlame,
+        ModelSoftDelete;
 
     /**
      * @inheritdoc
@@ -24,10 +25,9 @@ class Account extends BaseAccount
     public function behaviors()
     {
         return ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(), [
                 # custom behaviors
-            ]
+                ]
         );
     }
 
@@ -37,10 +37,26 @@ class Account extends BaseAccount
     public function rules()
     {
         return ArrayHelper::merge(
-             parent::rules(),
-             [
-                  # custom validation rules
-             ]
+                parent::rules(), [
+                # custom validation rules
+                ]
+        );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return ArrayHelper::merge(
+                parent::attributeLabels(),
+                [
+                # custom validation rules
+                'cif' => 'CIF',
+                'number' => 'Acc.Number',
+                'name' => 'Name',
+                'currency' => 'Currency',
+                ]
         );
     }
 }

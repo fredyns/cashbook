@@ -12,7 +12,7 @@ use yii\behaviors\TimestampBehavior;
  * This is the base-model class for table "account".
  *
  * @property integer $id
- * @property integer $owner_uid
+ * @property string $cif
  * @property string $number
  * @property string $name
  * @property string $currency
@@ -70,10 +70,10 @@ abstract class Account extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['owner_uid', 'number', 'name', 'currency'], 'required'],
-            [['owner_uid', 'deleted_at', 'deleted_by'], 'integer'],
+            [['cif', 'number', 'name', 'currency'], 'required'],
             [['accountStatus', 'recordStatus'], 'string'],
-            [['number'], 'string', 'max' => 32],
+            [['deleted_at', 'deleted_by'], 'integer'],
+            [['cif', 'number'], 'string', 'max' => 32],
             [['name'], 'string', 'max' => 255],
             [['currency'], 'string', 'max' => 8],
             ['accountStatus', 'in', 'range' => [
@@ -96,7 +96,7 @@ abstract class Account extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'owner_uid' => 'Owner Uid',
+            'cif' => 'Cif',
             'number' => 'Number',
             'name' => 'Name',
             'currency' => 'Currency',
