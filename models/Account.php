@@ -11,6 +11,8 @@ use app\models\base\Account as BaseAccount;
 
 /**
  * This is the model class for table "account".
+ *
+ * @property string $label model label
  */
 class Account extends BaseAccount
 {
@@ -58,5 +60,15 @@ class Account extends BaseAccount
                 'currency' => 'Currency',
                 ]
         );
+    }
+
+    /**
+     * get model label
+     *
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->number.' - '.$this->name;
     }
 }
