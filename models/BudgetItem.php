@@ -18,6 +18,7 @@ class BudgetItem extends BaseBudgetItem
     use ModelTool,
         ModelBlame,
         ModelSoftDelete;
+    const ALIAS_PARENT = 'parent';
 
     /**
      * @inheritdoc
@@ -44,12 +45,10 @@ class BudgetItem extends BaseBudgetItem
     }
 
     /**
-     * provide data options from model
-     *
-     * @return array
+     * @return \yii\db\ActiveQuery
      */
-    public static function options()
+    public function getParent()
     {
-        return ArrayHelper::map(static::findAll(['recordStatus' => 'active']), 'id', 'code');
+        return parent::getParent()->alias(static::ALIAS_PARENT);
     }
 }

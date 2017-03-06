@@ -45,16 +45,29 @@ class BudgetItemForm extends BudgetItem
             [['code'], 'required'],
             /* safe */
             /* field type */
-            [['recordStatus'], 'string'],
+            [['parent_id'], 'integer'],
+            [['status', 'recordStatus'], 'string'],
             [['code'], 'string', 'max' => 64],
             [['description'], 'string', 'max' => 255],
             /* value limitation */
+            ['status', 'in', 'range' => [
+                    self::STATUS_ACTIVE,
+                    self::STATUS_SUSPENDED,
+                ]
+            ],
             ['recordStatus', 'in', 'range' => [
                     self::RECORDSTATUS_ACTIVE,
                     self::RECORDSTATUS_DELETED,
                 ]
             ],
             /* value references */
+            [
+                ['parent_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => \app\models\BudgetItem::className(),
+                'targetAttribute' => ['parent_id' => 'id'],
+            ],
         ];
     }
 }

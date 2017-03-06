@@ -14,6 +14,8 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $id
  * @property string $code
  * @property string $description
+ * @property integer $parent_id
+ * @property string $status
  * @property string $recordStatus
  * @property integer $deleted_at
  * @property integer $deleted_by
@@ -22,6 +24,8 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $updated_at
  * @property integer $updated_by
  *
+ * @property \app\models\BudgetItem $parent
+ * @property \app\models\BudgetItem[] $budgetItems
  * @property \app\models\CashflowDetail[] $cashflowDetails
  * @property \app\models\MonthlyBudgetItem[] $monthlyBudgetItems
  * @property string $aliasModel
@@ -32,6 +36,8 @@ abstract class BudgetItem extends \yii\db\ActiveRecord
     /**
      * ENUM field values
      */
+    const STATUS_ACTIVE = 'active';
+    const STATUS_SUSPENDED = 'suspended';
     const RECORDSTATUS_ACTIVE = 'active';
     const RECORDSTATUS_DELETED = 'deleted';
 
@@ -67,10 +73,16 @@ abstract class BudgetItem extends \yii\db\ActiveRecord
     {
         return [
             [['code'], 'required'],
-            [['recordStatus'], 'string'],
-            [['deleted_at', 'deleted_by'], 'integer'],
+            [['parent_id', 'deleted_at', 'deleted_by'], 'integer'],
+            [['status', 'recordStatus'], 'string'],
             [['code'], 'string', 'max' => 64],
             [['description'], 'string', 'max' => 255],
+            [['parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\BudgetItem::className(), 'targetAttribute' => ['parent_id' => 'id']],
+            ['status', 'in', 'range' => [
+                    self::STATUS_ACTIVE,
+                    self::STATUS_SUSPENDED,
+                ]
+            ],
             ['recordStatus', 'in', 'range' => [
                     self::RECORDSTATUS_ACTIVE,
                     self::RECORDSTATUS_DELETED,
@@ -88,6 +100,8 @@ abstract class BudgetItem extends \yii\db\ActiveRecord
             'id' => 'ID',
             'code' => 'Code',
             'description' => 'Description',
+            'parent_id' => 'Parent',
+            'status' => 'Status',
             'recordStatus' => 'Record Status',
             'created_at' => 'Created At',
             'created_by' => 'Created By',
@@ -98,6 +112,22 @@ abstract class BudgetItem extends \yii\db\ActiveRecord
         ];
     }
         
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getParent()
+    {
+        return $this->hasOne(\app\models\BudgetItem::className(), ['id' => 'parent_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBudgetItems()
+    {
+        return $this->hasMany(\app\models\BudgetItem::className(), ['parent_id' => 'id']);
+    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -114,6 +144,34 @@ abstract class BudgetItem extends \yii\db\ActiveRecord
         return $this->hasMany(\app\models\MonthlyBudgetItem::className(), ['budgetItem_id' => 'id']);
     }
                 
+    /**
+     * get column status enum value label
+     * @param string $value
+     * @return string
+     */
+    public static function getStatusValueLabel($value)
+    {
+        $labels = self::optsStatus();
+
+        if(isset($labels[$value])) {
+            return $labels[$value];
+        }
+
+        return $value;
+    }
+
+    /**
+     * column status ENUM value labels
+     * @return array
+     */
+    public static function optsStatus()
+    {
+        return [
+            self::STATUS_ACTIVE => self::STATUS_ACTIVE,
+            self::STATUS_SUSPENDED => self::STATUS_SUSPENDED,
+        ];
+    }
+    
     /**
      * get column recordStatus enum value label
      * @param string $value
