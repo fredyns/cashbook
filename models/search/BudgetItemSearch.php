@@ -28,6 +28,16 @@ class BudgetItemSearch extends BudgetItem
                     return StringHelper::plaintextFilter($value);
                 },
             ],
+            [
+                ['parent_id'],
+                'filter',
+                'filter' => function($value) {
+                    return StringHelper::plaintextFilter($value);
+                },
+                'when' => function ($model, $attribute) {
+                    return !is_numeric($model->$attribute);
+                },
+            ],
             /* field type */
             [['code', 'description', 'recordStatus'], 'string'],
             /* value limitation */
@@ -111,6 +121,18 @@ class BudgetItemSearch extends BudgetItem
         $query
             ->andFilterWhere(['like', 'code', $this->code])
             ->andFilterWhere(['like', 'description', $this->description]);
+
+        if (is_numeric($this->parent_id)) {
+            $query->andFilterWhere([
+                static::tableName().'.parent_id' => $this->parent_id,
+            ]);
+        } elseif ($this->parent_id) {
+            $query->andFilterWhere([
+                'or',
+                ['like', static::ALIAS_PARENT.'.code', $this->parent_id],
+                ['like', static::ALIAS_PARENT.'.description', $this->parent_id],
+            ]);
+        }
 
         return $dataProvider;
     }
