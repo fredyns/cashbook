@@ -6,21 +6,42 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\MonthlyBudgetItem;
+use app\models\BudgetItem;
 
 /**
  * MonthlyBudgetItemSearch represents the model behind the search form about `app\models\MonthlyBudgetItem`.
  */
 class MonthlyBudgetItemSearch extends MonthlyBudgetItem
 {
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['id', 'month', 'budgetItem_id'], 'integer'],
-            [['year'], 'safe'],
+            /* filter */
+            [
+                ['budgetItem_id'],
+                'filter',
+                'filter' => function($value) {
+                    return StringHelper::plaintextFilter($value);
+                },
+                'when' => function ($model, $attribute) {
+                    return !is_numeric($model->$attribute);
+                },
+            ],
+            /* field type */
+            [['month'], 'integer', 'min' => 1, 'max' => 12],
             [['openBalance', 'debit', 'credit', 'closingBalance'], 'number'],
+            [['recordStatus'], 'string'],
+            [['year'], 'date', 'format' => 'php:Y'],
+            /* value limitation */
+            ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
+                ]
+            ],
         ];
     }
 
@@ -44,11 +65,27 @@ class MonthlyBudgetItemSearch extends MonthlyBudgetItem
     {
         $this->load($params);
 
+        $this->recordStatus = static::RECORDSTATUS_ACTIVE;
 
         return $this->search();
     }
 
-    
+    /**
+     * search deleted models
+     *
+     * @param array   $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchDeleted($params)
+    {
+        $this->load($params);
+
+        $this->recordStatus = static::RECORDSTATUS_DELETED;
+
+        return $this->search();
+    }
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -75,15 +112,23 @@ class MonthlyBudgetItemSearch extends MonthlyBudgetItem
 
         $query
             ->andFilterWhere([
-            'id' => $this->id,
-            'year' => $this->year,
-            'month' => $this->month,
-            'budgetItem_id' => $this->budgetItem_id,
-            'openBalance' => $this->openBalance,
-            'debit' => $this->debit,
-            'credit' => $this->credit,
-            'closingBalance' => $this->closingBalance,
+                static::tableName().'.id' => $this->id,
+                static::tableName().'.year' => $this->year,
+                static::tableName().'.month' => $this->month,
+                static::tableName().'.openBalance' => $this->openBalance,
+                static::tableName().'.debit' => $this->debit,
+                static::tableName().'.credit' => $this->credit,
+                static::tableName().'.closingBalance' => $this->closingBalance,
+                static::tableName().'.recordStatus' => $this->recordStatus,
         ]);
+
+        if (is_numeric($this->budgetItem_id)) {
+            $query->andFilterWhere([
+                static::tableName().'.budgetItem_id' => $this->budgetItem_id,
+            ]);
+        } elseif ($this->budgetItem_id) {
+            $query->andFilterWhere(['like', BudgetItem::tableName().'.code', $this->budgetItem_id]);
+        }
 
         return $dataProvider;
     }

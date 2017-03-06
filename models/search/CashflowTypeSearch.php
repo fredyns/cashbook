@@ -5,6 +5,7 @@ namespace app\models\search;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use fredyns\suite\helpers\StringHelper;
 use app\models\CashflowType;
 
 /**
@@ -12,14 +13,29 @@ use app\models\CashflowType;
  */
 class CashflowTypeSearch extends CashflowType
 {
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
+            /* filter */
+            [
+                ['name'],
+                'filter',
+                'filter' => function($value) {
+                    return StringHelper::plaintextFilter($value);
+                },
+            ],
+            [['recordStatus'], 'string'],
             [['id'], 'integer'],
-            [['name'], 'safe'],
+            /* value limitation */
+            ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
+                ]
+            ],
         ];
     }
 
@@ -43,11 +59,27 @@ class CashflowTypeSearch extends CashflowType
     {
         $this->load($params);
 
+        $this->recordStatus = static::RECORDSTATUS_ACTIVE;
 
         return $this->search();
     }
 
-    
+    /**
+     * search deleted models
+     *
+     * @param array   $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchDeleted($params)
+    {
+        $this->load($params);
+
+        $this->recordStatus = static::RECORDSTATUS_DELETED;
+
+        return $this->search();
+    }
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -74,7 +106,8 @@ class CashflowTypeSearch extends CashflowType
 
         $query
             ->andFilterWhere([
-            'id' => $this->id,
+                'id' => $this->id,
+                'recordStatus' => $this->recordStatus,
         ]);
 
         $query

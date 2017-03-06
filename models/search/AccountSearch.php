@@ -5,6 +5,7 @@ namespace app\models\search;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use fredyns\suite\helpers\StringHelper;
 use app\models\Account;
 
 /**
@@ -12,14 +13,35 @@ use app\models\Account;
  */
 class AccountSearch extends Account
 {
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
+            /* filter */
+            [
+                ['number', 'name', 'currency'],
+                'filter',
+                'filter' => function($value) {
+                    return StringHelper::plaintextFilter($value);
+                },
+            ],
+            /* field type */
             [['id', 'owner_uid'], 'integer'],
-            [['number', 'name', 'currency', 'accountStatus'], 'safe'],
+            [['accountStatus', 'recordStatus'], 'string'],
+            /* value limitation */
+            ['accountStatus', 'in', 'range' => [
+                    self::ACCOUNTSTATUS_ACTIVE,
+                    self::ACCOUNTSTATUS_SUSPENDED,
+                ]
+            ],
+            ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
+                ]
+            ],
         ];
     }
 
@@ -43,11 +65,27 @@ class AccountSearch extends Account
     {
         $this->load($params);
 
+        $this->recordStatus = static::RECORDSTATUS_ACTIVE;
 
         return $this->search();
     }
 
-    
+    /**
+     * search deleted models
+     *
+     * @param array   $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchDeleted($params)
+    {
+        $this->load($params);
+
+        $this->recordStatus = static::RECORDSTATUS_DELETED;
+
+        return $this->search();
+    }
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -74,15 +112,16 @@ class AccountSearch extends Account
 
         $query
             ->andFilterWhere([
-            'id' => $this->id,
-            'owner_uid' => $this->owner_uid,
+                'id' => $this->id,
+                'owner_uid' => $this->owner_uid,
+                'accountStatus' => $this->accountStatus,
+                'recordStatus' => $this->recordStatus,
         ]);
 
         $query
             ->andFilterWhere(['like', 'number', $this->number])
             ->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'currency', $this->currency])
-            ->andFilterWhere(['like', 'accountStatus', $this->accountStatus]);
+            ->andFilterWhere(['like', 'currency', $this->currency]);
 
         return $dataProvider;
     }

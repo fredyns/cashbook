@@ -5,6 +5,7 @@ namespace app\models\search;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use fredyns\suite\helpers\StringHelper;
 use app\models\Profile;
 
 /**
@@ -12,14 +13,31 @@ use app\models\Profile;
  */
 class ProfileSearch extends Profile
 {
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
+            /* filter */
+            [
+                ['bio', 'name', 'public_email', 'gravatar_email', 'location', 'website', 'timezone', 'phone', 'address'],
+                'filter',
+                'filter' => function($value) {
+
+                    return StringHelper::plaintextFilter($value);
+                },
+            ],
+            /* field type */
             [['id', 'user_id', 'picture_id'], 'integer'],
             [['name', 'public_email', 'gravatar_email', 'gravatar_id', 'location', 'website', 'bio', 'timezone'], 'safe'],
+            /* value limitation */
+            ['recordStatus', 'in', 'range' => [
+                    self::RECORDSTATUS_ACTIVE,
+                    self::RECORDSTATUS_DELETED,
+                ]
+            ],
         ];
     }
 
@@ -43,11 +61,27 @@ class ProfileSearch extends Profile
     {
         $this->load($params);
 
+        $this->recordStatus = static::RECORDSTATUS_ACTIVE;
 
         return $this->search();
     }
 
-    
+    /**
+     * search deleted models
+     *
+     * @param array   $params
+     *
+     * @return ActiveDataProvider
+     */
+    public function searchDeleted($params)
+    {
+        $this->load($params);
+
+        $this->recordStatus = static::RECORDSTATUS_DELETED;
+
+        return $this->search();
+    }
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -74,16 +108,17 @@ class ProfileSearch extends Profile
 
         $query
             ->andFilterWhere([
-            'id' => $this->id,
-            'user_id' => $this->user_id,
-            'picture_id' => $this->picture_id,
+                'id' => $this->id,
+                'user_id' => $this->user_id,
+                'picture_id' => $this->picture_id,
+                'gravatar_id' => $this->gravatar_id,
+                'recordStatus' => $this->recordStatus,
         ]);
 
         $query
             ->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'public_email', $this->public_email])
             ->andFilterWhere(['like', 'gravatar_email', $this->gravatar_email])
-            ->andFilterWhere(['like', 'gravatar_id', $this->gravatar_id])
             ->andFilterWhere(['like', 'location', $this->location])
             ->andFilterWhere(['like', 'website', $this->website])
             ->andFilterWhere(['like', 'bio', $this->bio])
