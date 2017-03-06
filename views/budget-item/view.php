@@ -52,6 +52,10 @@ $this->params['breadcrumbs'][] = $actionControl->breadcrumbLabel('view');
     DetailView::widget([
         'model' => $model,
         'attributes' => [
+            [
+                'linkActControl' => 'app\actioncontrols\BudgetItemActControl',
+                'attribute' => 'parent.label',
+            ],
             'code',
             'description',
         ],

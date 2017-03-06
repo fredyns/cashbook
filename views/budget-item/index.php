@@ -53,7 +53,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     'actionControl' => 'app\actioncontrols\BudgetItemActControl',
                     'attribute' => 'code',
                 ],
-                //'description',
+                'description',
+                [
+                    'attribute' => 'parent_id',
+                    'options' => [],
+                    'format' => 'raw',
+                    'value' => function ($model) {
+                        return \fredyns\suite\widgets\LinkedDetail::widget([
+                                'model' => $model,
+                                'attribute' => 'parent.label',
+                                'actionControl' => 'app\actioncontrols\BudgetItemActControl',
+                        ]);
+                    },
+                ],
                 [
                     'class' => 'fredyns\suite\grid\KartikActionColumn',
                     'actionControl' => 'app\actioncontrols\BudgetItemActControl',
