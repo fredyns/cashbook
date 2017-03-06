@@ -68,8 +68,8 @@ use yii\web\JsExpression;
                 ->field($model, 'account_id')
                 ->widget(Select2::classname(),
                     [
-                    'initValueText' => ArrayHelper::getValue($model, 'account.name', '-'),
-                    'options' => ['placeholder' => 'mencari akun ...'],
+                    'initValueText' => ArrayHelper::getValue($model, 'account.label', '-'),
+                    'options' => ['placeholder' => 'mencari rekening ...'],
                     'pluginOptions' => [
                         'minimumInputLength' => 2,
                         'language' => [
