@@ -102,4 +102,32 @@ class MonthlyBudgetItem extends BaseMonthlyBudgetItem
             12 => 'Des',
         ];
     }
+
+    /**
+     * provide last cycle options
+     *
+     * @param integer $optQty
+     * @return array
+     */
+    public static function lastCycleOptions($optQty = 12)
+    {
+        $monthNames = static::optsMonthNick();
+        $date = new \DateTime;
+        $options = [];
+
+        for ($i = 1; $i <= $optQty; $i++) {
+            $year = $date->format('Y');
+            $month = (int) $date->format('m');
+
+            if (isset($monthNames[$month])) {
+                $optKey = $year.'-'.$month;
+                $optLabel = $monthNames[$month].' '.$year;
+                $options[$optKey] = $optLabel;
+            }
+
+            $date->modify('-1 month');
+        }
+
+        return $options;
+    }
 }
