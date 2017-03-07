@@ -1,17 +1,19 @@
 <?php
 
-use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use cornernote\returnurl\ReturnUrl;
 use dmstr\bootstrap\Tabs;
+use kartik\builder\TabularForm;
+use kartik\widgets\ActiveForm;
 use kartik\widgets\Select2;
 use yii\web\JsExpression;
+use app\models\form\CashflowDetailCreate;
 
 /* @var $this yii\web\View */
-/* @var $model app\models\Cashflow */
+/* @var $model app\models\form\CashflowCreate|app\models\form\CashflowUpdate */
 /* @var $form ActiveForm */
 ?>
 
@@ -19,8 +21,8 @@ use yii\web\JsExpression;
 
     <?php
     $form = ActiveForm::begin([
-            'id' => 'Cashflow',
-            'layout' => 'horizontal',
+            'id' => 'CashflowForm',
+            //'layout' => 'horizontal',
             'enableClientValidation' => true,
             'errorSummaryCssClass' => 'error-summary alert alert-error'
     ]);
@@ -29,9 +31,8 @@ use yii\web\JsExpression;
     ?>
 
     <div class="">
-        <?php $this->beginBlock('main'); ?>
 
-        <p>
+        <div class="form-master">
 
             <!-- attribute cashflowType_id -->
             <?=
@@ -59,6 +60,9 @@ use yii\web\JsExpression;
                 ->widget(\yii\jui\DatePicker::classname(),
                     [
                     'dateFormat' => 'yyyy-MM-dd',
+                    'options' => [
+                        'class' => 'form-control',
+                    ],
                 ])
             ?>
 
@@ -91,26 +95,149 @@ use yii\web\JsExpression;
             <?=
             $form->field($model, 'notes')->textarea(['rows' => 6])
             ?>
-        </p>
 
-        <?php $this->endBlock(); ?>
+            <?= $form->errorSummary($model); ?>
 
-        <?=
-        Tabs::widget([
-            'encodeLabels' => false,
-            'items' => [
-                [
-                    'label' => Yii::t('app', 'Cashflow'),
-                    'content' => $this->blocks['main'],
-                    'active' => true,
+        </div>
+        <hr/>
+
+        <div class="form-detail">
+
+            <?php
+            if ($model->isNewRecord) {
+                if (empty($model->details)) {
+                    $model->details[] = new CashflowDetailCreate;
+                }
+
+                $dataProvider = new \yii\data\ArrayDataProvider([
+                    'allModels' => $model->details,
+                    'pagination' => FALSE,
+                ]);
+            } else {
+                $dataProvider = new \yii\data\ActiveDataProvider([
+                    'query' => $model->getDetails(),
+                    'pagination' => FALSE,
+                ]);
+            }
+
+            echo TabularForm::widget([
+                'dataProvider' => $dataProvider,
+                'form' => $form,
+                'checkboxColumn' => FALSE,
+                'actionColumn' => FALSE,
+                'attributes' => [
+                    // primary key column
+                    'id' => [// primary key attribute
+                        'type' => TabularForm::INPUT_HIDDEN,
+                        'columnOptions' => ['hidden' => true],
+                    ],
+                    'flow' => [
+                        'type' => TabularForm::INPUT_DROPDOWN_LIST,
+                        'items' => CashflowDetailCreate::optsFlow(),
+                    //'columnOptions' => ['width' => '185px']
+                    ],
+                    'nominal' => [
+                        'type' => TabularForm::INPUT_TEXT,
+                    ],
+                    'budgetItem_id' => [
+                        'type' => TabularForm::INPUT_WIDGET,
+                        'widgetClass' => Select2::classname(),
+                        'options' => function($detailModel, $key, $index, $widget) {
+                            return [
+                                'initValueText' => ArrayHelper::getValue($detailModel, 'budgetItem.name', '-'),
+                                'options' => ['placeholder' => 'mencari mata anggaran ...'],
+                                'pluginOptions' => [
+                                    'minimumInputLength' => 2,
+                                    'language' => [
+                                        'errorLoading' => new JsExpression("function () { return 'menunggu hasil...'; }"),
+                                    ],
+                                    'ajax' => [
+                                        'url' => Url::to(['/api/budget-item/list']),
+                                        'dataType' => 'json',
+                                        'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                                    ],
+                                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                    'templateResult' => new JsExpression('function(item) { return item.text; }'),
+                                    'templateSelection' => new JsExpression('function (item) { return item.text; }'),
+                                ],
+                            ];
+                        },
+                    //'columnOptions' => ['width' => '170px']
+                    ],
+                    'notes' => [
+                        'type' => TabularForm::INPUT_TEXT,
+                    ],
                 ],
-            ],
-        ]);
-        ?>
+            ]);
+            ?>
+
+        </div>
 
         <hr/>
 
-        <?php echo $form->errorSummary($model); ?>
+        <h3>Template</h3>
+
+        <div class="form-template">
+
+            <?php
+            echo TabularForm::widget([
+                'id' => 'grid-template',
+                'dataProvider' => new \yii\data\ArrayDataProvider([
+                    'allModels' => [
+                        (new \app\models\form\CashflowDetailForm),
+                    ],
+                    'pagination' => FALSE,
+                    ]),
+                'form' => $form,
+                'checkboxColumn' => FALSE,
+                'actionColumn' => FALSE,
+                'attributes' => [
+                    // primary key column
+                    'id' => [// primary key attribute
+                        'type' => TabularForm::INPUT_HIDDEN,
+                        'columnOptions' => ['hidden' => true],
+                    ],
+                    'flow' => [
+                        'type' => TabularForm::INPUT_DROPDOWN_LIST,
+                        'items' => CashflowDetailCreate::optsFlow(),
+                    //'columnOptions' => ['width' => '185px']
+                    ],
+                    'nominal' => [
+                        'type' => TabularForm::INPUT_TEXT,
+                    ],
+                    'budgetItem_id' => [
+                        'type' => TabularForm::INPUT_WIDGET,
+                        'widgetClass' => Select2::classname(),
+                        'options' => function($detailModel, $key, $index, $widget) {
+                            return [
+                                'initValueText' => ArrayHelper::getValue($detailModel, 'budgetItem.name', '-'),
+                                'options' => ['placeholder' => 'mencari mata anggaran ...'],
+                                'pluginOptions' => [
+                                    'minimumInputLength' => 2,
+                                    'language' => [
+                                        'errorLoading' => new JsExpression("function () { return 'menunggu hasil...'; }"),
+                                    ],
+                                    'ajax' => [
+                                        'url' => Url::to(['/api/budget-item/list']),
+                                        'dataType' => 'json',
+                                        'data' => new JsExpression('function(params) { return {q:params.term}; }')
+                                    ],
+                                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                    'templateResult' => new JsExpression('function(item) { return item.text; }'),
+                                    'templateSelection' => new JsExpression('function (item) { return item.text; }'),
+                                ],
+                            ];
+                        },
+                    //'columnOptions' => ['width' => '170px']
+                    ],
+                    'notes' => [
+                        'type' => TabularForm::INPUT_TEXT,
+                    ],
+                ],
+            ]);
+            ?>
+
+        </div>
 
         <?=
         Html::submitButton(
