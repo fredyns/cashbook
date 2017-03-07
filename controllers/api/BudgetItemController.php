@@ -49,7 +49,10 @@ class BudgetItemController extends \yii\rest\ActiveController
             $query = new Query;
 
             $query
-                ->select("id, CONCAT(code, ' - ', description) AS text")
+                ->select([
+                    "id",
+                    'text' => "CONCAT(code, ' - ', description)"
+                ])
                 ->from('budgetItem')
                 ->where([
                     'or',

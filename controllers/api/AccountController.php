@@ -49,7 +49,10 @@ class AccountController extends \yii\rest\ActiveController
             $query = new Query;
 
             $query
-                ->select("id, CONCAT(number, ' - ', name) AS text")
+                ->select([
+                    "id",
+                    'text' => "CONCAT(number, ' - ', name)"
+                ])
                 ->from('account')
                 ->where([
                     'or',
