@@ -2,10 +2,8 @@
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\StringHelper;
 use yii\helpers\Url;
 use cornernote\returnurl\ReturnUrl;
-use dmstr\bootstrap\Tabs;
 use kartik\builder\TabularForm;
 use kartik\grid\GridView;
 use kartik\money\MaskMoney;
@@ -227,24 +225,25 @@ $formname = $model->formName();
 
         <hr/>
 
-        <?=
-        Html::button(
+        <?php
+        echo Html::button(
             '<span class="glyphicon glyphicon-check"></span> Save &amp; Done',
             [
             'id' => 'save-'.$formname,
             'class' => 'btn btn-success form-submit'
             ]
-        );
-        ?>
-        &nbsp;
-        <?=
-        Html::button(
-            '<span class="glyphicon glyphicon-check"></span> Save &amp; Create More',
-            [
-            'id' => 'more-'.$formname,
-            'class' => 'btn btn-primary form-submit'
-            ]
-        );
+        )
+        .' &nbsp; &nbsp; ';
+
+        if ($model->isNewRecord) {
+            echo Html::button(
+                '<span class="glyphicon glyphicon-check"></span> Save &amp; Create More',
+                [
+                'id' => 'more-'.$formname,
+                'class' => 'btn btn-primary form-submit'
+                ]
+            );
+        }
         ?>
 
     </div>
