@@ -4,50 +4,76 @@ namespace app\models\form;
 
 use Yii;
 use yii\base\Model;
+use yii\helpers\ArrayHelper;
 
 /**
  * Description of CashflowUpdate
  *
- * @property CashflowDetailForm[] $details cashflow detail indexed by id
- *
  * @author Fredy Nurman Saleh <email@fredyns.net>
  */
-class CashflowUpdate extends CashflowForm
+class CashflowUpdate extends CashflowCreate
 {
+    /**
+     * stored/old cashflow-detail entries
+     *
+     * @var CashflowDetailUpdate[]
+     */
+    public $oldDetails = [];
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getDetails()
+    public function getCashflowDetails()
     {
         return $this
                 ->hasMany(CashflowDetailUpdate::className(), ['cashflow_id' => 'id'])
+                ->andWhere(['recordStatus' => 'active'])
                 ->indexBy('id');
+    }
+
+    /**
+     * load stored cashflow details
+     */
+    public function loadOldDetails()
+    {
+        $isPost = Yii::$app->request->isPost;
+        $entries = $isPost ? Yii::$app->request->post() : Yii::$app->request->get();
+        $this->oldDetails = $this->getCashflowDetails()->all();
+
+        if ($this->oldDetails) {
+            foreach ($this->oldDetails as $detail) {
+                $detail->setScenario($this->scenario);
+            }
+
+            Model::loadMultiple($this->oldDetails, $entries);
+        }
     }
 
     /**
      * @inheritdoc
      */
-    public function update($attributeNames = null)
+    public function updateWithDetail()
     {
         $this->setScenario('cashflow-update');
+        $this->loadOldDetails();
+        $this->loadNewDetails();
 
-        foreach ($this->details as $detail) {
-            $detail->setScenario($this->scenario);
-        }
+        // details content
+
+        $this->allDetails = ArrayHelper::merge($this->oldDetails, $this->newDetails);
 
         // load entries from post/get
 
         $isPost = Yii::$app->request->isPost;
         $entries = $isPost ? Yii::$app->request->post() : Yii::$app->request->get();
 
-        if (!$isPost OR ! $this->load($entries) OR ! Model::loadMultiple($this->details, $entries)) {
+        if (!$isPost OR ! $this->load($entries)) {
             return false;
         }
 
         // validation
 
-        if (!$this->validate() OR ! Model::validateMultiple($this->details)) {
+        if (!$this->validateWithDetail()) {
             return false;
         }
 
@@ -56,10 +82,17 @@ class CashflowUpdate extends CashflowForm
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-            parent::update(FALSE, $attributeNames);
+            $this->save(FALSE);
 
-            foreach ($this->details as $detail) {
-                $detail->save(FALSE);
+            foreach ($this->allDetails as $detail) {
+                if ($detail->isNewRecord) {
+                    $detail->cashflow_id = $this->id;
+                    $detail->save(FALSE);
+                } elseif ($detail->recordStatus == CashflowDetailForm::RECORDSTATUS_DELETED) {
+                    $detail->delete();
+                } else {
+                    $detail->save(FALSE);
+                }
             }
 
             $transaction->commit();

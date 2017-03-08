@@ -7,6 +7,8 @@ use yii\helpers\Url;
 use cornernote\returnurl\ReturnUrl;
 use dmstr\bootstrap\Tabs;
 use kartik\builder\TabularForm;
+use kartik\grid\GridView;
+use kartik\money\MaskMoney;
 use kartik\widgets\ActiveForm;
 use kartik\widgets\Select2;
 use yii\web\JsExpression;
@@ -15,7 +17,16 @@ use app\models\form\CashflowDetailCreate;
 /* @var $this yii\web\View */
 /* @var $model app\models\form\CashflowCreate|app\models\form\CashflowUpdate */
 /* @var $form ActiveForm */
+
+$minDetailCount = 5;
+$formname = $model->formName();
 ?>
+
+<style>
+    tr.danger * {
+        text-decoration: line-through;
+    }
+</style>
 
 <div class="cashflow-form">
 
@@ -28,6 +39,7 @@ use app\models\form\CashflowDetailCreate;
     ]);
 
     echo Html::hiddenInput('ru', ReturnUrl::getRequestToken());
+    echo Html::hiddenInput('next-action', 'done', ['id' => 'next-action']);
     ?>
 
     <div class="">
@@ -104,47 +116,71 @@ use app\models\form\CashflowDetailCreate;
         <div class="form-detail">
 
             <?php
-            if ($model->isNewRecord) {
-                if (empty($model->details)) {
-                    $model->details[] = new CashflowDetailCreate;
-                }
+            $newDetailCount = Yii::$app->request->get('detailCount');
 
-                $dataProvider = new \yii\data\ArrayDataProvider([
-                    'allModels' => $model->details,
-                    'pagination' => FALSE,
-                ]);
-            } else {
-                $dataProvider = new \yii\data\ActiveDataProvider([
-                    'query' => $model->getDetails(),
-                    'pagination' => FALSE,
+            if (empty($newDetailCount) OR $newDetailCount < $minDetailCount) {
+                $newDetailCount = $minDetailCount;
+            }
+
+            for ($i = 1; $i <= $newDetailCount; $i++) {
+                $model->allDetails[] = new CashflowDetailCreate([
+                    'recordStatus' => CashflowDetailCreate::RECORDSTATUS_DELETED,
+                    'nominal' => 0,
                 ]);
             }
 
             echo TabularForm::widget([
-                'dataProvider' => $dataProvider,
+                'dataProvider' => new \yii\data\ArrayDataProvider([
+                    'allModels' => $model->allDetails,
+                    'pagination' => FALSE,
+                    ]),
                 'form' => $form,
-                'checkboxColumn' => FALSE,
                 'actionColumn' => FALSE,
+                'checkboxColumn' => [
+                    'class' => '\kartik\grid\CheckboxColumn',
+                    'contentOptions' => ['class' => 'kv-row-select'],
+                    'headerOptions' => ['class' => 'kv-all-select'],
+                    'header' => '<i class="glyphicon glyphicon-trash"></i>',
+                    'checkboxOptions' => function ($model, $key, $index, $column) {
+                        $classSlug = $model->isNewRecord ? 'cashflowdetailcreate' : 'cashflowdetailupdate';
+
+                        return [
+                            'value' => $classSlug."-{$key}-recordstatus",
+                        ];
+                    }
+                ],
                 'attributes' => [
                     // primary key column
                     'id' => [// primary key attribute
                         'type' => TabularForm::INPUT_HIDDEN,
                         'columnOptions' => ['hidden' => true],
                     ],
+                    'recordStatus' => [
+                        'type' => TabularForm::INPUT_HIDDEN,
+                        'columnOptions' => ['hidden' => true],
+                        'options' => ['class' => 'detail-recordStatus'],
+                    ],
                     'flow' => [
                         'type' => TabularForm::INPUT_DROPDOWN_LIST,
                         'items' => CashflowDetailCreate::optsFlow(),
-                    //'columnOptions' => ['width' => '185px']
+                        'columnOptions' => ['width' => '100px']
                     ],
                     'nominal' => [
-                        'type' => TabularForm::INPUT_TEXT,
+                        'type' => TabularForm::INPUT_WIDGET,
+                        'widgetClass' => MaskMoney::classname(),
+                        'columnOptions' => ['width' => '160px'],
+                        'options' => [
+                            'options' => [
+                                'style' => 'text-align: right;',
+                            ],
+                        ],
                     ],
                     'budgetItem_id' => [
                         'type' => TabularForm::INPUT_WIDGET,
                         'widgetClass' => Select2::classname(),
                         'options' => function($detailModel, $key, $index, $widget) {
                             return [
-                                'initValueText' => ArrayHelper::getValue($detailModel, 'budgetItem.name', '-'),
+                                'initValueText' => ArrayHelper::getValue($detailModel, 'budgetItem.label', '-'),
                                 'options' => ['placeholder' => 'mencari mata anggaran ...'],
                                 'pluginOptions' => [
                                     'minimumInputLength' => 2,
@@ -167,6 +203,22 @@ use app\models\form\CashflowDetailCreate;
                     'notes' => [
                         'type' => TabularForm::INPUT_TEXT,
                     ],
+                ],
+                'gridSettings' => [
+                    'rowOptions' => function ($model, $key, $index, $grid) {
+                        return [
+                            'class' => $model->isNewRecord ? 'CashflowDetailCreate' : 'CashflowUpdate',
+                        ];
+                    },
+                    'panel' => [
+                        'heading' => '<h3 class="panel-title">Cashflow Details</h3>',
+                        'type' => GridView::TYPE_PRIMARY,
+                        'footer' => ''
+                        .Html::button(
+                            '<i class="glyphicon glyphicon-plus"></i> Add New Detail'
+                            , ['id' => 'add-new-detail', 'class' => 'btn btn-info pull-right']
+                        ),
+                    ]
                 ],
             ]);
             ?>
@@ -175,77 +227,22 @@ use app\models\form\CashflowDetailCreate;
 
         <hr/>
 
-        <h3>Template</h3>
-
-        <div class="form-template">
-
-            <?php
-            echo TabularForm::widget([
-                'id' => 'grid-template',
-                'dataProvider' => new \yii\data\ArrayDataProvider([
-                    'allModels' => [
-                        (new \app\models\form\CashflowDetailForm),
-                    ],
-                    'pagination' => FALSE,
-                    ]),
-                'form' => $form,
-                'checkboxColumn' => FALSE,
-                'actionColumn' => FALSE,
-                'attributes' => [
-                    // primary key column
-                    'id' => [// primary key attribute
-                        'type' => TabularForm::INPUT_HIDDEN,
-                        'columnOptions' => ['hidden' => true],
-                    ],
-                    'flow' => [
-                        'type' => TabularForm::INPUT_DROPDOWN_LIST,
-                        'items' => CashflowDetailCreate::optsFlow(),
-                    //'columnOptions' => ['width' => '185px']
-                    ],
-                    'nominal' => [
-                        'type' => TabularForm::INPUT_TEXT,
-                    ],
-                    'budgetItem_id' => [
-                        'type' => TabularForm::INPUT_WIDGET,
-                        'widgetClass' => Select2::classname(),
-                        'options' => function($detailModel, $key, $index, $widget) {
-                            return [
-                                'initValueText' => ArrayHelper::getValue($detailModel, 'budgetItem.name', '-'),
-                                'options' => ['placeholder' => 'mencari mata anggaran ...'],
-                                'pluginOptions' => [
-                                    'minimumInputLength' => 2,
-                                    'language' => [
-                                        'errorLoading' => new JsExpression("function () { return 'menunggu hasil...'; }"),
-                                    ],
-                                    'ajax' => [
-                                        'url' => Url::to(['/api/budget-item/list']),
-                                        'dataType' => 'json',
-                                        'data' => new JsExpression('function(params) { return {q:params.term}; }')
-                                    ],
-                                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                                    'templateResult' => new JsExpression('function(item) { return item.text; }'),
-                                    'templateSelection' => new JsExpression('function (item) { return item.text; }'),
-                                ],
-                            ];
-                        },
-                    //'columnOptions' => ['width' => '170px']
-                    ],
-                    'notes' => [
-                        'type' => TabularForm::INPUT_TEXT,
-                    ],
-                ],
-            ]);
-            ?>
-
-        </div>
-
         <?=
-        Html::submitButton(
-            '<span class="glyphicon glyphicon-check"></span> '.
-            ($model->isNewRecord ? 'Create' : 'Save'),
+        Html::button(
+            '<span class="glyphicon glyphicon-check"></span> Save &amp; Done',
             [
-            'id' => 'save-'.$model->formName(),
-            'class' => 'btn btn-success'
+            'id' => 'save-'.$formname,
+            'class' => 'btn btn-success form-submit'
+            ]
+        );
+        ?>
+        &nbsp;
+        <?=
+        Html::button(
+            '<span class="glyphicon glyphicon-check"></span> Save &amp; Create More',
+            [
+            'id' => 'more-'.$formname,
+            'class' => 'btn btn-primary form-submit'
             ]
         );
         ?>
@@ -255,4 +252,39 @@ use app\models\form\CashflowDetailCreate;
     <?php ActiveForm::end(); ?>
 
 </div>
+
+<?php
+$js = <<<JS
+
+	$(function () {
+        $(".CashflowDetailCreate:first .detail-recordStatus").val("active");
+        $(".CashflowDetailCreate:gt(0)").hide();
+
+        $("#add-new-detail").click(function(){
+            $(".CashflowDetailCreate:hidden:first .detail-recordStatus").val("active");
+            $(".CashflowDetailCreate:hidden:first").show();
+        });
+
+        $(".form-submit").click(function(){
+            $("#CashflowForm").submit();
+        });
+
+        $("#more-{$formname}").click(function(){
+            $("#next-action").val("more");
+        });
+
+        $(".kv-row-checkbox:checkbox").click(function(){
+            statusId = $(this).val();
+
+            if($(this).prop('checked') == true){
+                $("#"+statusId).val("deleted");
+            } else {
+                $("#"+statusId).val("active");
+            }
+        });
+	});
+
+JS;
+
+$this->registerJs($js, \yii\web\View::POS_READY);
 

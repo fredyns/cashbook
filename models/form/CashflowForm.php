@@ -78,4 +78,18 @@ class CashflowForm extends Cashflow
             ],
         ];
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function scenarios()
+    {
+        return ArrayHelper::merge(
+                parent::scenarios(),
+                [
+                'cashflow-create' => ['cashflowType_id', 'number', 'date', 'account_id', 'notes'],
+                'cashflow-update' => ['cashflowType_id', 'number', 'date', 'account_id', 'notes'],
+                ]
+        );
+    }
 }
