@@ -14,9 +14,12 @@ use app\models\Cashflow;
  * @author Fredy Nurman Saleh <email@fredyns.net>
  *
  * @property Cashflow $model data model
+ * @property string $allowApprove is allowing to Approve model
+ * @property array $urlApprove url config for Approve model
  */
 class CashflowActControl extends \fredyns\suite\libraries\ActionControl
 {
+    const ACTION_APPROVE = 'approve';
 
     /**
      * @inheritdoc
@@ -32,9 +35,9 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
     public function breadcrumbLabels()
     {
         return ArrayHelper::merge(
-            parent::breadcrumbLabels(), [
+                parent::breadcrumbLabels(), [
                 'index' => 'Cashflow',
-            ]
+                ]
         );
     }
 
@@ -68,8 +71,10 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
     public function actionPersistentModel()
     {
         return ArrayHelper::merge(
-                parent::actionPersistentModel(), [
-                    #  additional action name
+                parent::actionPersistentModel(),
+                [
+                #  additional action name
+                static::ACTION_APPROVE,
                 ]
         );
     }
@@ -81,7 +86,7 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
     {
         return ArrayHelper::merge(
                 parent::actionUnspecifiedModel(), [
-                    # additional action name
+                # additional action name
                 ]
         );
     }
@@ -94,8 +99,23 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
         return ArrayHelper::merge(
                 parent::actions(),
                 [
+                static::ACTION_APPROVE => [
+                    'label' => 'Approve',
+                    'url' => $this->urlApprove,
+                    'icon' => Icon::show('star'),
+                    'linkOptions' => [
+                        'title' => 'click approve this cashflow',
+                        'aria-label' => 'Approve',
+                        'data-pjax' => '0',
+                        'data-confirm' => 'Are you sure to approve this item?',
+                        'data-method' => 'post',
+                    ],
+                    'buttonOptions' => [
+                        'class' => 'btn btn-primary',
+                    ],
+                ],
                 /* / action sample / */
-                
+
                 # 'action_name' => [
                 #     'label'         => 'Action_Label',
                 #     'url'           => $this->urlAction,
@@ -123,7 +143,34 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
         return true;
     }
 
-    ################################ sample : additional action ################################ 
+    /**
+     * get URL param to approve model
+     *
+     * @return array
+     */
+    public function getUrlApprove()
+    {
+        if ($this->model instanceof ActiveRecord) {
+            $param = $this->modelParam();
+            $param[0] = $this->actionRoute(static::ACTION_APPROVE);
+            $param['ru'] = ReturnUrl::getToken();
+
+            return $param;
+        }
+
+        return [];
+    }
+
+    /**
+     * check permission to approve model
+     *
+     * @return boolean
+     */
+    public function getAllowApprove($params = [])
+    {
+        return true;
+    }
+    ################################ sample : additional action ################################
 
     /**
      * get URL param to do action
@@ -132,10 +179,9 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
      */
     public function getUrlAction()
     {
-        if ($this->model instanceof ActiveRecord)
-        {
-            $param       = $this->modelParam();
-            $param[0]    = $this->actionRoute('action_slug');
+        if ($this->model instanceof ActiveRecord) {
+            $param = $this->modelParam();
+            $param[0] = $this->actionRoute('action_slug');
             $param['ru'] = ReturnUrl::getToken();
 
             return $param;
@@ -153,5 +199,4 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
     {
         return true;
     }
-
 }

@@ -37,6 +37,7 @@ class CashflowController extends \app\controllers\base\CashflowController
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['post'],
+                    'approve' => ['post'],
                 ],
             ],
         ];
@@ -95,5 +96,23 @@ class CashflowController extends \app\controllers\base\CashflowController
                 'model' => $model,
                 'actionControl' => $actionControl,
         ]);
+    }
+
+    public function actionApprove($id)
+    {
+        try {
+            $model = $this->findModel($id);
+
+            CashflowActControl::checkAccess('approve', $model);
+
+            if ($model->approve() !== false) {
+                Yii::$app->getSession()->addFlash('info', "Data successfully approved!");
+            }
+        } catch (\Exception $e) {
+            $msg = (isset($e->errorInfo[2])) ? $e->errorInfo[2] : $e->getMessage();
+            Yii::$app->getSession()->addFlash('error', $msg);
+        } finally {
+            return $this->redirect(ReturnUrl::getUrl(Url::previous()));
+        }
     }
 }

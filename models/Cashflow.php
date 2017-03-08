@@ -64,4 +64,26 @@ class Cashflow extends BaseCashflow
     {
         return parent::getCashflowDetails()->andWhere(['recordStatus' => 'active']);
     }
+
+    public function approve()
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            MonthlyBudgetItemRecap::parseMultiple($this->cashflowDetails);
+
+            $this->approval = static::APPROVAL_APPROVED;
+            $this->approvedBy = Yii::$app->user->id;
+            $this->approved_at = time();
+
+            $this->save(FALSE);
+            $transaction->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+
+            throw $e;
+        }
+    }
 }
