@@ -52,4 +52,12 @@ class CashflowType extends BaseCashflowType
     {
         return ArrayHelper::map(static::findAll(['recordStatus' => 'active']), 'id', 'name');
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCashflows()
+    {
+        return parent::getCashflows()->andWhere(['recordStatus' => 'active']);
+    }
 }

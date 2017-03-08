@@ -56,4 +56,12 @@ class Cashflow extends BaseCashflow
     {
         return $this->getBlamedProfile('approved_by', static::ALIAS_APPROVEDBY);
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCashflowDetails()
+    {
+        return parent::getCashflowDetails()->andWhere(['recordStatus' => 'active']);
+    }
 }

@@ -44,6 +44,14 @@ class MonthlyBudgetItem extends BaseMonthlyBudgetItem
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getCashflowDetails()
+    {
+        return parent::getCashflowDetails()->andWhere(['recordStatus' => 'active']);
+    }
+
+    /**
      * get column month enum value label
      * @param string $value
      * @return string

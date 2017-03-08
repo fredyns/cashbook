@@ -71,4 +71,12 @@ class Account extends BaseAccount
     {
         return $this->number.' - '.$this->name;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCashflows()
+    {
+        return parent::getCashflows()->andWhere(['recordStatus' => 'active']);
+    }
 }

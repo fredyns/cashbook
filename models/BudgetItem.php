@@ -63,4 +63,28 @@ class BudgetItem extends BaseBudgetItem
     {
         return parent::getParent()->alias(static::ALIAS_PARENT);
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getBudgetItems()
+    {
+        return parent::getBudgetItems()->andWhere(['recordStatus' => 'active']);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCashflowDetails()
+    {
+        return parent::getCashflowDetails()->andWhere(['recordStatus' => 'active']);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMonthlyBudgetItems()
+    {
+        return parent::getMonthlyBudgetItems()->andWhere(['recordStatus' => 'active']);
+    }
 }
