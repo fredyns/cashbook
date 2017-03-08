@@ -14,7 +14,6 @@ use app\models\CashflowDetail;
  */
 class CashflowDetailCreate extends CashflowDetailForm
 {
-    public $del;
 
     /**
      * @inheritdoc
@@ -50,7 +49,6 @@ class CashflowDetailCreate extends CashflowDetailForm
                     }',
             ],
             /* safe */
-            [['del'], 'safe'],
             /* field type */
             [['cashflow_id', 'budgetItem_id', 'monthlyBudgetItem_id'], 'integer'],
             [['flow', 'notes', 'recordStatus'], 'string'],
