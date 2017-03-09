@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use kartik\grid\GridView;
 use cornernote\returnurl\ReturnUrl;
+use app\models\MonthlyBudgetItem;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -15,13 +16,13 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="giiant-crud monthly-budget-item-index">
 
     <h1>
-        <?= Yii::t('app', 'Monthly Budget Items') ?>
+<?= Yii::t('app', 'Monthly Budget Items') ?>
         <small class="badge">
             List
         </small>
     </h1>
 
-    <?php //echo $this->render('_search', ['model' =>$searchModel]);?>
+    <?php //echo $this->render('_search', ['model' =>$searchModel]); ?>
 
     <?php
     \yii\widgets\Pjax::begin([
@@ -35,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 
     <div>
-        <?= Html::errorSummary($searchModel); ?>
+<?= Html::errorSummary($searchModel); ?>
     </div>
 
     <div class="table-responsive">
@@ -140,6 +141,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     </div>
 
-    <?php \yii\widgets\Pjax::end(); ?>
+<?php \yii\widgets\Pjax::end(); ?>
 
 </div>
