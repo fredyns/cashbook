@@ -37,7 +37,7 @@ class CashflowController extends \app\controllers\base\CashflowController
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['post'],
-                    'approve' => ['post'],
+                    'approve' => ['get', 'post'],
                 ],
             ],
         ];
@@ -105,7 +105,7 @@ class CashflowController extends \app\controllers\base\CashflowController
 
             CashflowActControl::checkAccess('approve', $model);
 
-            if ($model->approve() !== false) {
+            if ($model->approve()) {
                 Yii::$app->getSession()->addFlash('info', "Data successfully approved!");
             }
         } catch (\Exception $e) {

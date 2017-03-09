@@ -67,13 +67,14 @@ class Cashflow extends BaseCashflow
 
     public function approve()
     {
+        $details = $this->cashflowDetails;
         $transaction = Yii::$app->db->beginTransaction();
 
         try {
-            MonthlyBudgetItemRecap::parseMultiple($this->cashflowDetails);
+            MonthlyBudgetItemRecap::parseMultiple($details);
 
             $this->approval = static::APPROVAL_APPROVED;
-            $this->approvedBy = Yii::$app->user->id;
+            $this->approved_by = Yii::$app->user->id;
             $this->approved_at = time();
 
             $this->save(FALSE);

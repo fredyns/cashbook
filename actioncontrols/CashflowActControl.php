@@ -102,7 +102,7 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
                 static::ACTION_APPROVE => [
                     'label' => 'Approve',
                     'url' => $this->urlApprove,
-                    'icon' => Icon::show('star'),
+                    'icon' => Icon::show('check-square-o'),
                     'linkOptions' => [
                         'title' => 'click approve this cashflow',
                         'aria-label' => 'Approve',
@@ -168,7 +168,7 @@ class CashflowActControl extends \fredyns\suite\libraries\ActionControl
      */
     public function getAllowApprove($params = [])
     {
-        return true;
+        return ($this->model->approval == Cashflow::APPROVAL_PENDING);
     }
     ################################ sample : additional action ################################
 

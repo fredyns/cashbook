@@ -25,8 +25,8 @@ class MonthlyBudgetItemRecap extends MonthlyBudgetItem
 
         $budgetItemIds = static::getBudgetItemIds($cashflowDetails);
         $currentRecaps = static::getRecap($budgetItemIds);
-        $prevRecaps = static::getRecap($budgetItemIds, "last month");
-        $prevDate = new \DateTime("last month");
+        $prevRecaps = static::getRecap($budgetItemIds, "previous month");
+        $prevDate = new \DateTime("previous month");
 
         // recap cashflow
 
@@ -34,13 +34,7 @@ class MonthlyBudgetItemRecap extends MonthlyBudgetItem
             $budgetItemId = $cashflowDetail->budgetItem_id;
             $nominal = $cashflowDetail->nominal;
 
-            if ($cashflowDetail->flow = CashflowDetail::FLOW_CREDIT) {
-                $nominal *= -1;
-            }
-
-            if (isset($currentRecaps[$budgetItemId])) {
-                $currentRecaps[$budgetItemId]->closingBalance += $cashflowDetail->nominal;
-            } else {
+            if (!isset($currentRecaps[$budgetItemId])) {
                 $prevBalance = (int) ArrayHelper::getValue($prevRecaps, $budgetItemId.'.closingBalance', 0);
                 $currentRecaps[$budgetItemId] = new static([
                     'year' => $prevDate->format('Y'),
@@ -50,13 +44,22 @@ class MonthlyBudgetItemRecap extends MonthlyBudgetItem
                     'openBalance' => $prevBalance,
                     'debit' => 0,
                     'credit' => 0,
-                    'closingBalance' => ($prevBalance + $nominal),
+                    'closingBalance' => $prevBalance,
                 ]);
 
                 $currentRecaps[$budgetItemId]->save(false);
             }
 
+            // debit mengurangi saldo
+
+            if ($cashflowDetail->flow = CashflowDetail::FLOW_CREDIT) {
+                $nominal *= -1;
+            }
+
+            $currentRecaps[$budgetItemId]->{$cashflowDetail->flow} += $cashflowDetail->nominal;
+            $currentRecaps[$budgetItemId]->closingBalance += $cashflowDetail->nominal;
             $cashflowDetail->monthlyBudgetItem_id = $currentRecaps[$budgetItemId]->id;
+
             $cashflowDetail->save(false);
         }
 
@@ -98,6 +101,7 @@ class MonthlyBudgetItemRecap extends MonthlyBudgetItem
                     'budgetItem_id' => $budgetItemIds,
                     'recordStatus' => static::RECORDSTATUS_ACTIVE,
                 ])
-                ->indexBy('budgetItem_id');
+                ->indexBy('budgetItem_id')
+                ->all();
     }
 }
